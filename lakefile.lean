@@ -9,7 +9,7 @@ def optionCompilerBindings := (get_config? bindings_cc).getD "cc"
 def optionFlagsCompileFlecs := splitArgStr $ (get_config? flecs_cflags).getD ""
 def optionFlagsCompileBindings := splitArgStr $ (get_config? bindings_cflags).getD ""
 
-require pod from git "https://github.com/KislyjKisel/lean-pod" @ "117faba"
+require pod from git "https://github.com/KislyjKisel/lean-pod" @ "3d1c43f"
 
 package flecs where
   srcDir := "src"
@@ -31,9 +31,9 @@ target flecs.o pkg : FilePath := do
     (#["-fPIC", "-DFLECS_CUSTOM_BUILD"].append optionFlagsCompileFlecs)
     optionCompilerFlecs
 
-extern_lib «flecs» pkg := do
-  let flecsO ← flecs.o.fetch
-  buildStaticLib (pkg.nativeLibDir / nameToStaticLib "flecs") #[flecsO]
+-- extern_lib «flecs» pkg := do
+--   let flecsO ← flecs.o.fetch
+--   buildStaticLib (pkg.nativeLibDir / nameToStaticLib "flecs") #[flecsO]
 
 end Flecs
 
@@ -41,16 +41,21 @@ end Flecs
 section Bindings
 
 def bindingsSources := #[
+  "core/constants",
+  "core/types",
   "core/world"
 ]
 
-def bindingsExtras : Array String := #[]
+def bindingsExtras : Array String := #[
+  "ffi/include/flecs.lean/types.h"
+]
 
 def bindingsCFlags (pkg : NPackage _package.name) : FetchM (Array String × Array String) := do
   let mut weakArgs := #["-I", (← getLeanIncludeDir).toString]
   let mut traceArgs := optionFlagsCompileBindings.append #[
     "-fPIC",
-    "-I", (pkg.dir / "flecs").toString
+    "-I", (pkg.dir / "flecs").toString,
+    "-I", (pkg.dir / "ffi" / "include").toString
   ]
 
   match pkg.deps.find? λ dep ↦ dep.name == `pod with
@@ -64,15 +69,16 @@ extern_lib «flecs-lean» pkg := do
   let (weakArgs, traceArgs) ← bindingsCFlags pkg
   let nativeSrcDir := pkg.dir / "ffi"
   let objectFileDir := pkg.irDir / "ffi"
-  let extraTrace ← mixTraceArray <$> (bindingsExtras.mapM $ λ h ↦ computeTrace (nativeSrcDir / (h ++ ".h")))
+  let extraTrace ← mixTraceArray <$> (bindingsExtras.mapM $ λ h ↦ computeTrace (pkg.dir / ⟨h⟩))
   buildStaticLib (pkg.nativeLibDir / name)
-    (← bindingsSources.mapM λ suffix ↦ do
-      buildO
-        (objectFileDir / (suffix ++ ".o"))
-        (← inputFile $ nativeSrcDir / (suffix ++ ".c"))
-        weakArgs traceArgs
-        optionCompilerBindings
-        (pure extraTrace)
-    )
+    (#[(← flecs.o.fetch)].append
+      (← bindingsSources.mapM λ suffix ↦ do
+        buildO
+          (objectFileDir / (suffix ++ ".o"))
+          (← inputFile $ nativeSrcDir / (suffix ++ ".c"))
+          weakArgs traceArgs
+          optionCompilerBindings
+          (pure extraTrace)
+      ))
 
 end Bindings
