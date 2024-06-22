@@ -1,3 +1,1 @@
-namespace Flecs
-
-def hello := "world"
+import Flecs.Core.World

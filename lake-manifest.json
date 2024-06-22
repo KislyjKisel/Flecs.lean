@@ -1,5 +1,14 @@
 {"version": 7,
  "packagesDir": ".lake/packages",
- "packages": [],
+ "packages":
+ [{"url": "https://github.com/KislyjKisel/lean-pod",
+   "type": "git",
+   "subDir": null,
+   "rev": "117fababe3988edb66c2b346b61e7941de716f24",
+   "name": "pod",
+   "manifestFile": "lake-manifest.json",
+   "inputRev": "117faba",
+   "inherited": false,
+   "configFile": "lakefile.lean"}],
  "name": "flecs",
  "lakeDir": ".lake"}
