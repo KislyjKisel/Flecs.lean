@@ -12,6 +12,11 @@ builtin_initialize initializeTypes
 
 /-! # Core API Types -/
 
+abbrev Flags8 := UInt8
+abbrev Flags16 := UInt16
+abbrev Flags32 := UInt32
+abbrev Flags64 := UInt64
+
 /--
 Ids are the things that can be added to an entity.
 An id can be an entity or pair, and can have optional id flags.
@@ -31,7 +36,7 @@ abbrev Entity := Id
 A world is the container for all ECS data and supporting features.
 Multiple isolated worlds may exist at the same time.
 -/
-define_foreign_type World
+define_foreign_type World (α : Type)
 
 /-- A table stores entities and components for a specific type. -/
 define_foreign_type Table
@@ -87,13 +92,13 @@ This is the current list of types in the flecs API that can be used as an `Poly`
 Functions that accept an `Poly` argument can accept objects of these types.
 If the object does not have the requested mixin the API will throw an assert.
 -/
-define_foreign_type Poly
+define_foreign_type Poly (α : Type)
 
 private unsafe
-def Poly.ofWorldImpl (world : World) : Poly := unsafeCast world
+def Poly.ofWorldImpl {α} (world : World α) : Poly α := unsafeCast world
 
 @[implemented_by ofWorldImpl]
-opaque Poly.ofWorld (world : World) : Poly
+opaque Poly.ofWorld {α} (world : World α) : Poly α
 
 -- private unsafe
 -- def Poly.ofStageImpl (Stage : Stage) : Poly := unsafeCast Stage
@@ -102,22 +107,22 @@ opaque Poly.ofWorld (world : World) : Poly
 -- opaque Poly.ofStage (Stage : Stage) : Poly
 
 private unsafe
-def Poly.ofQueryImpl (Query : Query) : Poly := unsafeCast Query
+def Poly.ofQueryImpl {α} (Query : Query) : Poly α := unsafeCast Query
 
 @[implemented_by ofQueryImpl]
-opaque Poly.ofQuery (Query : Query) : Poly
+opaque Poly.ofQuery {α} (Query : Query) : Poly α
 
 private unsafe
-def Poly.ofFilterImpl (Filter : Filter) : Poly := unsafeCast Filter
+def Poly.ofFilterImpl {α} (Filter : Filter) : Poly α := unsafeCast Filter
 
 @[implemented_by ofFilterImpl]
-opaque Poly.ofFilter (Filter : Filter) : Poly
+opaque Poly.ofFilter {α} (Filter : Filter) : Poly α
 
 private unsafe
-def Poly.ofRuleImpl (Rule : Rule) : Poly := unsafeCast Rule
+def Poly.ofRuleImpl {α} (Rule : Rule) : Poly α := unsafeCast Rule
 
 @[implemented_by ofRuleImpl]
-opaque Poly.ofRule (Rule : Rule) : Poly
+opaque Poly.ofRule {α} (Rule : Rule) : Poly α
 
 /-- Type that stores poly mixins. -/
 define_foreign_type Mixins
@@ -129,27 +134,26 @@ define_foreign_type Header
 /-! # Function Types -/
 
 /-- Action callback on world exit. -/
-def FiniAction := World → BaseIO Unit
+def FiniAction (α) := World α → BaseIO Unit
 
 
+-- /-- Function type for runnables (systems, observers). -/
+-- def RunAction := Iter → BaseIO Unit
 
-/-- Function type for runnables (systems, observers). -/
-def RunAction := Iter → BaseIO Unit
+-- /-- Function type for iterables. -/
+-- def IterAction := Iter → BaseIO Unit
 
-/-- Function type for iterables. -/
-def IterAction := Iter → BaseIO Unit
+-- /-- Function type for creating an iterator from a poly. -/
+-- def IterInitAction := World → Poly → Iter → Term → BaseIO Unit
 
-/-- Function type for creating an iterator from a poly. -/
-def IterInitAction := World → Poly → Iter → Term → BaseIO Unit
+-- /-- Function type for iterating an iterator  -/
+-- def IterNextAction := Iter → BaseIO Bool
 
-/-- Function type for iterating an iterator  -/
-def IterNextAction := Iter → BaseIO Bool
+-- /-- Function type for freeing an iterator. -/
+-- def IterFiniAction := Iter → BaseIO Unit
 
-/-- Function type for freeing an iterator. -/
-def IterFiniAction := Iter → BaseIO Unit
-
-/-- Callback used for comparing components. -/
-def OrderByAction (α : Type) := Entity → α → Entity → α → BaseIO Int32
+-- /-- Callback used for comparing components. -/
+-- def OrderByAction (α : Type) := Entity → α → Entity → α → BaseIO Int32
 
 -- /-- Callback used for sorting the entire table of components. -/
 -- def SortTableAction

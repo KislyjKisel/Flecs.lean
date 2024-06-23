@@ -2,15 +2,23 @@
 #include <flecs.h>
 #include <flecs.lean/types.h>
 
-LEAN_EXPORT lean_obj_res lean_flecs_init(lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_flecs_World_box(ecs_init()));
+static void lean_flecs_ctx_free(void* ctx) {
+    lean_dec((lean_object*)ctx);
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_mini(lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_flecs_World_box(ecs_mini()));
+LEAN_EXPORT lean_obj_res lean_flecs_init(lean_obj_arg ctx, lean_obj_arg io_) {
+    ecs_world_t* world = ecs_init();
+    ecs_set_ctx(world, ctx, lean_flecs_ctx_free);
+    return lean_io_result_mk_ok(lean_flecs_World_box(world));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_init_w_args(b_lean_obj_arg args, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_mini(lean_obj_arg ctx, lean_obj_arg io_) {
+    ecs_world_t* world = ecs_mini();
+    ecs_set_ctx(world, ctx, lean_flecs_ctx_free);
+    return lean_io_result_mk_ok(lean_flecs_World_box(world));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_init_w_args(lean_obj_arg ctx, b_lean_obj_arg args, lean_obj_arg io_) {
     size_t size = lean_array_size(args);
     char** argv = malloc(size * sizeof(char*));
     for (size_t i = 0; i < size; ++i) {
@@ -18,6 +26,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_init_w_args(b_lean_obj_arg args, lean_obj_ar
     }
     ecs_world_t* world = ecs_init_w_args(size, argv);
     free(argv);
+    ecs_set_ctx(world, ctx, lean_flecs_ctx_free);
     return lean_io_result_mk_ok(lean_flecs_World_box(world));
 }
 
