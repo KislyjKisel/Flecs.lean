@@ -1,0 +1,8 @@
+{
+    "C_Cpp.default.includePath": [
+        "~/.elan/toolchains/stable/include",
+        "flecs",
+        ".lake/packages/pod/src/native/include",
+        "ffi/include",
+    ],
+}
