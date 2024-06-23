@@ -4,6 +4,8 @@ namespace Flecs
 
 variable {α : Type}
 
+/-! # Creating & Deleting -/
+
 /--
 Create new entity id.
 
@@ -66,3 +68,60 @@ If the entity passed to `delete` is not alive, the operation will have no side e
 opaque World.delete (world : @& World α) (entity : Entity) : BaseIO Unit
 
 -- TODO: ecs_new_w_table ecs_entity_init ecs_delete_with ecs_bulk_new_w_id ecs_bulk_init
+
+
+/-! # Adding & Removing -/
+
+/--
+Add a (component) id to an entity.
+
+This operation adds a single (component) id to an entity.
+If the entity already has the id, this operation will have no side effects.
+-/
+@[extern "lean_flecs_addId"]
+opaque World.addId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
+
+/--
+Remove a (component) id from an entity.
+
+This operation removes a single (component) id to an entity.
+If the entity does not have the id, this operation will have no side effects.
+-/
+@[extern "lean_flecs_removeId"]
+opaque World.removeId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
+
+/--
+Add override for (component) id.
+
+[docs](https://www.flecs.dev/flecs/group__adding__removing.html#ga0d3524b1a92effae1dc7c783f37a2acd)
+-/
+@[extern "lean_flecs_overrideId"]
+opaque World.overrideId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
+
+/--
+Clear all components.
+
+This operation will remove all components from an entity.
+-/
+@[extern "lean_flecs_clear"]
+opaque World.clear (world : @& World α) (entity : Entity) : BaseIO Unit
+
+/--
+Remove all instances of the specified (component) id.
+
+This will remove the specified id from all entities (tables). The id may be a wildcard and/or a pair.
+-/
+@[extern "lean_flecs_removeAll"]
+opaque World.removeAll (world : @& World α) (id : Id) : BaseIO Unit
+
+/--
+Set current with id.
+
+New entities are automatically created with the specified id.
+-/
+@[extern "lean_flecs_setWith"]
+opaque World.setWith (world : @& World α) (id : Id) : BaseIO Entity
+
+/-- Get the id set with `setWith`. -/
+@[extern "lean_flecs_getWith"]
+opaque World.getWith (world : @& World α) : BaseIO Id
