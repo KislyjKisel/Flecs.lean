@@ -125,3 +125,38 @@ opaque World.setWith (world : @& World α) (id : Id) : BaseIO Entity
 /-- Get the id set with `setWith`. -/
 @[extern "lean_flecs_getWith"]
 opaque World.getWith (world : @& World α) : BaseIO Id
+
+
+/-! # Enabling & Disabling -/
+
+/--
+Enable or disable entity.
+
+This operation enables or disables an entity by adding or removing the `disabled` tag.
+A disabled entity will not be matched with any systems,
+unless the system explicitly specifies the `disabled` tag.
+-/
+@[extern "lean_flecs_enable"]
+opaque World.enable (world : @& World α) (entity : Entity) (enabled : Bool) : BaseIO Unit
+
+/--
+Enable or disable component.
+
+Enabling or disabling a component does not add or remove a component from an entity,
+but prevents it from being matched with queries.
+This operation can be useful when a component must be temporarily disabled without destroying its value.
+It is also a more performant operation for when an application needs to
+add/remove components at high frequency, as enabling/disabling is cheaper than a regular add or remove.
+-/
+@[extern "lean_flecs_enableId"]
+opaque World.enableId (world : @& World α) (entity : Entity) (id : Id) (enable : Bool) : BaseIO Unit
+
+/--
+Test if component is enabled.
+
+Test whether a component is currently enabled or disabled.
+This operation will return true when the entity has the component and
+if it has not been disabled by `enableId`.
+-/
+@[extern "lean_flecs_isEnabledId"]
+opaque World.isEnabledId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool

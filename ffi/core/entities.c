@@ -95,3 +95,33 @@ LEAN_EXPORT lean_obj_res lean_flecs_getWith(lean_flecs_World world, lean_obj_arg
         ecs_get_with(lean_flecs_World_fromRepr(world))
     ));
 }
+
+
+// Enabling & Disabling
+
+LEAN_EXPORT lean_obj_res lean_flecs_enable(lean_flecs_World world, lean_flecs_Entity entity, uint8_t enabled, lean_obj_arg io_) {
+    ecs_enable(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        enabled
+    );
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_enableId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, uint8_t enable, lean_obj_arg io_) {
+    ecs_enable_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(id),
+        enable
+    );
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_isEnabledId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_box(ecs_is_enabled_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(entity)
+    )));
+}
