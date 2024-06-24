@@ -64,6 +64,7 @@ static inline lean_object* lean_flecs_##name##_toRepr(cty cvalue) { return lean_
 
 LEAN_FLECS_DECLARE_TYPE_PTR(World, ecs_world_t*)
 LEAN_FLECS_DECLARE_TYPE_PTR(Poly, ecs_poly_t*)
+LEAN_FLECS_DECLARE_TYPE_PTR(Iter, ecs_iter_t*)
 
 // Miscellaneous types
 

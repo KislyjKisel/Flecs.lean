@@ -43,7 +43,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_isFini(lean_flecs_World world, lean_obj_arg 
 
 static void lean_flecs_FiniAction_wrapper(ecs_world_t* world, void* ctx) {
     lean_object* action = (lean_object*)ctx;
-    lean_apply_2(action, lean_flecs_World_box(world), lean_box(0));
+    lean_apply_2(action, lean_flecs_World_box(world), lean_io_mk_world());
     lean_dec_ref(action); // called only once before the world is destroyed or the action is unregistered
 }
 
