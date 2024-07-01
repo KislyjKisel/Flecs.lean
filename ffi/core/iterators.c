@@ -44,9 +44,9 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_setVarAsTable(lean_flecs_Iter it, uint3
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_setVarAsRange(lean_flecs_Iter it, uint32_t varId, b_lean_obj_arg range, lean_obj_arg io_) {
     ecs_table_range_t range_c;
-    range_c.table = lean_flecs_Table_unbox(LEAN_POD_CTOR_GET_BOX(lean_flecs_TableRange_layout, range, 0));
-    range_c.offset = (int32_t)lean_unbox_uint32(LEAN_POD_CTOR_GET_BOX(lean_flecs_TableRange_layout, range, 1));
-    range_c.count = (int32_t)lean_unbox_uint32(LEAN_POD_CTOR_GET_BOX(lean_flecs_TableRange_layout, range, 2));
+    range_c.table = lean_flecs_Table_unbox(LEAN_POD_CTOR_GET(range, LEAN_FLECS_TableRange_table));
+    range_c.offset = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(range, LEAN_FLECS_TableRange_offset));
+    range_c.count = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(range, LEAN_FLECS_TableRange_count));
     ecs_iter_set_var_as_range(lean_flecs_Iter_fromRepr(it), (int32_t)varId, &range_c);
     return lean_io_result_mk_ok(lean_box(0));
 }

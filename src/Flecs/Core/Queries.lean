@@ -1,27 +1,22 @@
--- import Pod.Int
--- import Flecs.Core.Types
+import Pod.Int
+import Flecs.Core.Types
 
--- open Pod (Int32)
+open Pod (Int32)
 
--- namespace Flecs
+namespace Flecs
 
--- variable {α : Type}
+variable {α : Type}
 
--- /--
--- This operation creates a query.
--- Queries are used to iterate over entities that match a filter and are the fastest way to find and iterate over entities and their components.
+/-- Create a query. -/
+@[extern "lean_flecs_Query_init"]
+opaque Query.init (world : @& World α) (desc : QueryDesc α) : BaseIO Query
 
--- [docs](https://www.flecs.dev/flecs/group__queries.html#ga9ba162bbb307faf2e301a4a68bce54ad)
--- -/
--- @[extern "lean_flecs_queryInit"]
--- opaque World.queryInit {β} (world : @& World α) (desc : @& QueryDesc β) : BaseIO Query
-
--- /--
--- This operation destroys a query and its resources.
--- If the query is used as the parent of subqueries, those subqueries will be orphaned and must be deinitialized as well.
--- -/
--- @[extern "lean_flecs_Query_fini"]
--- opaque Query.fini (query : @& Query) : BaseIO Query
+/--
+This operation destroys a query and its resources.
+If the query is used as the parent of subqueries, those subqueries will be orphaned and must be deinitialized as well.
+-/
+@[extern "lean_flecs_Query_fini"]
+opaque Query.fini (query : @& Query) : BaseIO Unit
 
 
 

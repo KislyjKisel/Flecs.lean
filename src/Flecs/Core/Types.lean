@@ -1,9 +1,11 @@
 import Pod.Meta
 import Pod.Int
 import Pod.Storable
+import Pod.ReadBytes
+import Pod.Instances
 import Flecs.Core.Defines
 
-open Pod (Int16 Int32 Int64 Storable)
+open Pod (Int16 Int32 Int64 Storable ReadBytes)
 
 namespace Flecs
 
@@ -39,6 +41,7 @@ instance : OfNat Id 0 := inferInstanceAs (OfNat UInt64 0)
 instance : Repr Id := inferInstanceAs (Repr UInt64)
 instance : ToString Id := inferInstanceAs (ToString UInt64)
 instance : Storable Id := inferInstanceAs (Storable UInt64)
+instance : ReadBytes Id := inferInstanceAs (ReadBytes UInt64)
 
 abbrev Entity := Id
 
@@ -143,7 +146,13 @@ def FiniAction (α) := World α → BaseIO Unit
 def OrderByAction (α : Type) := Entity → α → Entity → α → BaseIO Int32
 
 /-- Callback used for grouping tables in a query. -/
-def GroupByAction (α) := World α → Table → Id → BaseIO UInt64
+def GroupByAction (α) := World α → Table → (groupId : Id) → BaseIO UInt64
+
+/-- Callback invoked when a query creates a new group. -/
+def GroupCreateAction (α β : Type) := World α → (groupId : UInt64) → BaseIO β
+
+/-- Callback invoked when a query deletes an existing group. -/
+def GroupDeleteAction (α β : Type) := World α → (groupId : UInt64) → β → BaseIO Unit
 
 -- /-- Function type for runnables (systems, observers). -/
 -- def RunAction := Iter → BaseIO Unit
@@ -212,12 +221,12 @@ inductive QueryCacheKind where
 | none
 deriving Repr, Inhabited, DecidableEq
 
-structure TermIdFlags where
+structure TermFlags where
   val : UInt64
 deriving Repr, Inhabited
 
-instance : OfNat TermIdFlags 0 := ⟨⟨0⟩⟩
-instance : OrOp TermIdFlags where
+instance : OfNat TermFlags 0 := ⟨⟨0⟩⟩
+instance : OrOp TermFlags where
   or a b := .mk (a.val ||| b.val)
 
 
@@ -225,55 +234,55 @@ instance : OrOp TermIdFlags where
 Match on self.
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.self := TermIdFlags.mk ((1 : UInt64) <<< 63)
+def TermFlags.self := TermFlags.mk ((1 : UInt64) <<< 63)
 
 /--
 Match by traversing upwards.
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.up := TermIdFlags.mk ((1 : UInt64) <<< 62)
+def TermFlags.up := TermFlags.mk ((1 : UInt64) <<< 62)
 
 /--
 Traverse relationship transitively.
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.trav := TermIdFlags.mk ((1 : UInt64) <<< 61)
+def TermFlags.trav := TermFlags.mk ((1 : UInt64) <<< 61)
 
 /--
 Sort results breadth first.
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.cascade := TermIdFlags.mk ((1 : UInt64) <<< 60)
+def TermFlags.cascade := TermFlags.mk ((1 : UInt64) <<< 60)
 
 /--
 Iterate groups in descending order.
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.desc := TermIdFlags.mk ((1 : UInt64) <<< 59)
+def TermFlags.desc := TermFlags.mk ((1 : UInt64) <<< 59)
 
 /--
 Term id is a variable.
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.isVariable := TermIdFlags.mk ((1 : UInt64) <<< 58)
+def TermFlags.isVariable := TermFlags.mk ((1 : UInt64) <<< 58)
 
 /--
 Term id is an entity.
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.isEntity := TermIdFlags.mk ((1 : UInt64) <<< 57)
+def TermFlags.isEntity := TermFlags.mk ((1 : UInt64) <<< 57)
 
 /--
 Term id is a name (don't attempt to lookup as entity).
 Can be combined with other term flags on the `TermRef.id` field.
 -/
-def TermIdFlags.isName := TermIdFlags.mk ((1 : UInt64) <<< 56)
+def TermFlags.isName := TermFlags.mk ((1 : UInt64) <<< 56)
 
 /-- All term traversal flags. Can be combined with other term flags on the `TermRef.id` field. -/
-def traverseFlags := TermIdFlags.self ||| TermIdFlags.up ||| TermIdFlags.trav ||| TermIdFlags.cascade ||| TermIdFlags.desc
+def traverseFlags := TermFlags.self ||| TermFlags.up ||| TermFlags.trav ||| TermFlags.cascade ||| TermFlags.desc
 
 /-- All term reference kind flags. Can be combined with other term flags on the `TermRef.id` field. -/
-def termRefFlags := traverseFlags ||| TermIdFlags.isVariable ||| TermIdFlags.isEntity ||| TermIdFlags.isName
+def termRefFlags := traverseFlags ||| TermFlags.isVariable ||| TermFlags.isEntity ||| TermFlags.isName
 
 /-- Type that describes a reference to an entity or variable in a term. -/
 structure TermRef where
@@ -281,12 +290,12 @@ structure TermRef where
   Entity id.
   If left to 0 and flags does not specify whether id is an entity or a variable
   the id will be initialized to `Entity.this`.
-  To explicitly set the id to 0, leave the id member to 0 and set `TermIdFlags.isEntity` in flags.
+  To explicitly set the id to 0, leave the id member to 0 and set `TermFlags.isEntity` in flags.
   -/
   id : Entity
   /--
   Name.
-  This can be either the variable name (when `TermIdFlags.isVariable` flag is set) or an entity name.
+  This can be either the variable name (when `TermFlags.isVariable` flag is set) or an entity name.
   -/
   name : String
 deriving Repr, Inhabited
@@ -311,6 +320,86 @@ structure Term where
   /-- Index of field for term in iterator. -/
   fieldIndex : Int16
 deriving Repr, Inhabited
+
+structure QueryFlags where
+  val : UInt32
+deriving Repr, Inhabited
+
+instance : OfNat QueryFlags 0 := ⟨⟨0⟩⟩
+instance : OrOp QueryFlags where
+  or a b := .mk (a.val ||| b.val)
+
+/--
+Query must match prefabs.
+Can be combined with other query flags on the `QueryDesc.flags` field.
+-/
+def QueryFlags.matchPrefab := QueryFlags.mk ((1 : UInt32) <<< 1)
+
+/--
+Query must match disabled entities.
+Can be combined with other query flags on the `QueryDesc.flags` field.
+-/
+def QueryFlags.matchDisabled := QueryFlags.mk ((1 : UInt32) <<< 2)
+
+/--
+Query must match empty tables.
+Can be combined with other query flags on the `QueryDesc.flags` field.
+-/
+def QueryFlags.matchEmptyTables := QueryFlags.mk ((1 : UInt32) <<< 3)
+
+/--
+Query won't provide component data.
+Can be combined with other query flags on the `QueryDesc.flags` field.
+-/
+def QueryFlags.noData := QueryFlags.mk ((1 : UInt32) <<< 4)
+
+/--
+Query iteration is always instanced.
+Can be combined with other query flags on the `QueryDesc.flags` field.
+-/
+def QueryFlags.isInstanced := QueryFlags.mk ((1 : UInt32) <<< 5)
+
+/--
+Query may have unresolved entity identifiers.
+Can be combined with other query flags on the `QueryDesc.flags` field.
+-/
+def QueryFlags.allowUnresolvedByName := QueryFlags.mk ((1 : UInt32) <<< 6)
+
+/--
+Query only returns whole tables (ignores toggle/member fields).
+Can be combined with other query flags on the `QueryDesc.flags` field.
+-/
+def QueryFlags.tableOnly := QueryFlags.mk ((1 : UInt32) <<< 7)
+
+inductive OrderBy where
+| none
+| boxed (entity : Entity) (α : Type) (callback : OrderByAction α)
+| unboxed (entity : Entity) (α : Type) [Storable α] [ReadBytes α] (callback : OrderByAction α)
+
+inductive GroupBy (α : Type) where
+| none
+| simple (component : Id) (callback : GroupByAction α)
+| detailed (component : Id) (callback : GroupByAction α) (β : Type) (onCreate : GroupCreateAction α β) (onDelete : GroupDeleteAction α β)
+
+/--
+Used with `Query.init`.
+
+`α` - world context type.
+-/
+structure QueryDesc (α : Type) where
+  /-- Query terms -/
+  terms : Array Term := #[]
+  terms_size_lt : terms.size < termCountMax := by decide
+  /-- Query DSL expression -/
+  expr : Option String := none
+  /-- Caching policy of query. -/
+  cacheKind : QueryCacheKind := .default
+  /-- Flags for enabling query features. -/
+  flags : QueryFlags := 0
+  orderBy : OrderBy := .none
+  groupBy : GroupBy α := .none
+  /-- Entity associated with query (optional). -/
+  entity : Entity := 0
 
 
 /-! # Miscellaneous types -/
@@ -502,31 +591,4 @@ opaque QueryGroupInfo.ctx [Nonempty α] (qgi : @& QueryGroupInfo α) : BaseIO α
 
 
 /-! # Other types -/
-
-structure FilterDesc where
-  terms : Array Term
-  instanced : Bool := false
-  flags : Flags32 := 0
-  entity : Entity := 0
-deriving Repr, Inhabited
-
-/--
-* `α` is used by `orderBy` as the `orderByComponent`'s component type
--/
-structure QueryDesc (α : Type) where
-  /--
-  If set, the query will be created as a subquery.
-
-  A subquery matches at most a subset of its parent query.
-  Subqueries do not directly receive (table) notifications from the world.
-  Instead parent queries forward results to subqueries.
-  This can improve matching performance, as fewer queries need to be matched with new tables.
-  Subqueries can be nested.
-  -/
-  parent : Option Query
-  filter : FilterDesc
-  /-- Component to be used by `orderBy`. -/
-  orderByComponent : Entity
-  orderBy : Option (OrderByAction α)
-  -- todo: sort_table, group by
-deriving Inhabited
+/-! # Other types -/
