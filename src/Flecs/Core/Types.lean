@@ -374,7 +374,7 @@ def QueryFlags.tableOnly := QueryFlags.mk ((1 : UInt32) <<< 7)
 inductive OrderBy where
 | none
 | boxed (entity : Entity) (α : Type) (callback : OrderByAction α)
-| unboxed (entity : Entity) (α : Type) [Storable α] [ReadBytes α] (callback : OrderByAction α)
+| unboxed (entity : Entity) (α : Type) (callback : OrderByAction α) [Storable α] [ReadBytes α]
 
 inductive GroupBy (α : Type) where
 | none
