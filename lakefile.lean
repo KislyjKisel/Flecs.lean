@@ -9,7 +9,7 @@ def optionCompilerBindings := (get_config? bindings_cc).getD "cc"
 def optionFlagsCompileFlecs := splitArgStr $ (get_config? flecs_cflags).getD ""
 def optionFlagsCompileBindings := splitArgStr $ (get_config? bindings_cflags).getD ""
 
-require pod from git "https://github.com/KislyjKisel/lean-pod" @ "fbdd39e"
+require pod from git "https://github.com/KislyjKisel/lean-pod" @ "39cbbb8"
 
 package flecs where
   srcDir := "src"
@@ -26,7 +26,7 @@ section Flecs
 
 target flecs.o pkg : FilePath := do
   let oFile := pkg.buildDir / "c" / "flecs.o"
-  let srcJob ← inputFile <| pkg.dir / "flecs" / "flecs.c"
+  let srcJob ← inputTextFile <| pkg.dir / "flecs" / "flecs.c"
   buildO oFile srcJob #[]
     (#["-fPIC", "-DFLECS_CUSTOM_BUILD"].append optionFlagsCompileFlecs)
     optionCompilerFlecs
@@ -47,7 +47,6 @@ def bindingsSources := #[
   "core/entities",
   "core/components",
   "core/ids",
-  "core/filters",
   "core/queries",
   "core/observers",
   "core/iterators",
@@ -84,7 +83,7 @@ extern_lib «flecs-lean» pkg := do
       (← bindingsSources.mapM λ suffix ↦ do
         buildO
           (objectFileDir / (suffix ++ ".o"))
-          (← inputFile $ nativeSrcDir / (suffix ++ ".c"))
+          (← inputTextFile $ nativeSrcDir / (suffix ++ ".c"))
           weakArgs traceArgs
           optionCompilerBindings
           (pure extraTrace)

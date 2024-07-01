@@ -4,17 +4,8 @@
 #include <lean_pod.h>
 #include <flecs.h>
 
-#define lean_flecs_Float uint32_t
-#define lean_flecs_Float_box lean_pod_Float32_box
-#define lean_flecs_Float_unbox lean_pod_Float32_unbox
-#define lean_flecs_Float_fromRepr lean_pod_Float32_fromBits
-#define lean_flecs_Float_toRepr lean_pod_Float32_toBits
-
-#define lean_flecs_FTime lean_flecs_Float
-#define lean_flecs_FTime_box lean_flecs_Float_box
-#define lean_flecs_FTime_unbox lean_flecs_Float_unbox
-#define lean_flecs_FTime_fromRepr lean_flecs_Float_fromRepr
-#define lean_flecs_FTime_toRepr lean_flecs_Float_toRepr
+LEAN_POD_TYPE_ALIAS(flecs_Float, ecs_float_t, pod_Float32, float)
+LEAN_POD_TYPE_ALIAS(flecs_FTime, ecs_ftime_t, flecs_Float, ecs_float_t)
 
 #define lean_flecs_Id uint64_t
 static inline lean_object* lean_flecs_Id_box(ecs_entity_t cvalue) {\
@@ -30,44 +21,37 @@ static inline uint64_t lean_flecs_Id_toRepr(ecs_entity_t cvalue) {
     return cvalue;
 }
 
-#define lean_flecs_Entity lean_flecs_Id
-#define lean_flecs_Entity_box lean_flecs_Id_box
-#define lean_flecs_Entity_unbox lean_flecs_Id_unbox
-#define lean_flecs_Entity_fromRepr lean_flecs_Id_fromRepr
-#define lean_flecs_Entity_toRepr lean_flecs_Id_toRepr
+LEAN_POD_TYPE_ALIAS(flecs_Entity, ecs_entity_t, flecs_Id, ecs_id_t);
 
-#define LEAN_FLECS_DECLARE_TYPE(name, cty)\
-typedef lean_object* lean_flecs_##name;\
-extern lean_external_class* lean_flecs_##name##_class;\
-static inline lean_object* lean_flecs_##name##_box(cty cvalue) {\
-    return lean_alloc_external(lean_flecs_##name##_class, cvalue);\
-}\
-static inline cty lean_flecs_##name##_unbox(b_lean_obj_arg lean_value) {\
-    return (cty) lean_get_external_data(lean_value);\
-}\
-static inline cty lean_flecs_##name##_fromRepr(b_lean_obj_arg lean_value) {\
-    return (cty) lean_get_external_data(lean_value);\
-}\
-static inline lean_object* lean_flecs_##name##_toRepr(cty cvalue) {\
-    return lean_flecs_##name##_box(cvalue);\
-}
-
-LEAN_FLECS_DECLARE_TYPE(Ptr, void*);
-#define LEAN_FLECS_DECLARE_TYPE_PTR(name, cty)\
-typedef lean_flecs_Ptr lean_flecs_##name;\
-static inline lean_object* lean_flecs_##name##_box(cty cvalue) { return lean_flecs_Ptr_box((void*)cvalue); }\
-static inline cty lean_flecs_##name##_unbox(b_lean_obj_arg lean_value) { return (cty)lean_flecs_Ptr_unbox(lean_value); }\
-static inline cty lean_flecs_##name##_fromRepr(b_lean_obj_arg lean_value) { return (cty)lean_flecs_Ptr_fromRepr(lean_value); }\
-static inline lean_object* lean_flecs_##name##_toRepr(cty cvalue) { return lean_flecs_Ptr_toRepr((void*)cvalue); }
 
 // Core types
 
-LEAN_FLECS_DECLARE_TYPE_PTR(World, ecs_world_t*)
-LEAN_FLECS_DECLARE_TYPE_PTR(Poly, ecs_poly_t*)
-LEAN_FLECS_DECLARE_TYPE_PTR(Iter, ecs_iter_t*)
+LEAN_POD_PTR_ALIAS(flecs_World, ecs_world_t*)
+LEAN_POD_PTR_ALIAS(flecs_Poly, ecs_poly_t*)
+LEAN_POD_PTR_ALIAS(flecs_Table, ecs_table_t*)
+LEAN_POD_DECLARE_EXTERNAL_CLASS(flecs_Iter, ecs_iter_t*)
+
+static inline lean_object* lean_flecs_Iter_box(ecs_iter_t it) {
+    ecs_iter_t* it_box = lean_pod_alloc(sizeof(ecs_iter_t));
+    *it_box = it;
+    return lean_alloc_external(lean_flecs_Iter_class, it_box);
+}
+
+#define lean_flecs_Iter_toRepr lean_flecs_Iter_box
+
+#define lean_flecs_TableRange_layout 3, 0, 0, 0, 0
+
+static inline lean_object* lean_flecs_TableRange_box(const ecs_table_range_t* tr) {
+    lean_object* obj = lean_alloc_ctor(0, 3, 0);
+    LEAN_POD_CTOR_SET_BOX(lean_flecs_TableRange_layout, obj, 0, lean_flecs_Table_box(tr->table));
+    LEAN_POD_CTOR_SET_BOX(lean_flecs_TableRange_layout, obj, 1, lean_box_uint32(tr->offset));
+    LEAN_POD_CTOR_SET_BOX(lean_flecs_TableRange_layout, obj, 2, lean_box_uint32(tr->count));
+    return obj;
+}
+
 
 // Miscellaneous types
 
-LEAN_FLECS_DECLARE_TYPE_PTR(BuildInfo, const ecs_build_info_t*)
-LEAN_FLECS_DECLARE_TYPE_PTR(WorldInfo, const ecs_world_info_t*)
-LEAN_FLECS_DECLARE_TYPE_PTR(QueryGroupInfo, const ecs_query_group_info_t*)
+LEAN_POD_PTR_ALIAS(flecs_BuildInfo, const ecs_build_info_t*)
+LEAN_POD_PTR_ALIAS(flecs_WorldInfo, const ecs_world_info_t*)
+LEAN_POD_PTR_ALIAS(flecs_QueryGroupInfo, const ecs_query_group_info_t*)

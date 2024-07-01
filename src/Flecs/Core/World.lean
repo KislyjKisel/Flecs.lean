@@ -42,6 +42,10 @@ opaque World.isFini (world : @& World α) : BaseIO Bool
 @[extern "lean_flecs_atFini"]
 opaque World.atFini (world : @& World α) (action : FiniAction α) : BaseIO Unit
 
+/-- Return entity identifiers in world. -/
+@[extern "lean_flecs_entities"]
+opaque World.entities (world : @& World α) : BaseIO (Array Entity)
+
 
 /-! # Frame -/
 
@@ -99,24 +103,6 @@ Post frame actions are typically used for calling operations that cannot be invo
 -/
 @[extern "lean_flecs_runPostFrame"]
 opaque World.runPostFrame (world : @& World α) (action : FiniAction α) : BaseIO Unit
-
-/--
-Set a default value for the `ecs_filter_desc_t::flags` field.
-Default flags are applied in addition to the flags provided in the descriptor.
-For a list of available flags, see `include/flecs/private/api_flags.h`.
-Typical flags to use are:
-
-* `EcsFilterMatchInstanced`
-* `EcsFilterMatchEmptyTables`
-* `EcsFilterMatchDisabled`
-* `EcsFilterMatchPrefab`
-
-Only use flags that start with `EcsFilter`.
-Do not use `EcsQuery*` flags.
-This function may only be called when no queries are created.
--/
-@[extern "lean_flecs_setDefaultQueryFlags"]
-opaque World.setDefaultQueryFlags (world : @& World α) (flags : Flags32) : BaseIO Unit
 
 /--
 Set target frames per second (FPS) for application.
@@ -212,22 +198,6 @@ opaque World.deferSuspend (world : @& World α) : BaseIO Unit
 opaque World.deferResume (world : @& World α) : BaseIO Unit
 
 /--
-Enable/disable auto-merging for world or stage.
-
-When auto-merging is enabled, staged data will automatically be merged with the world when staging ends.
-This happens at the end of `progress`, at a sync point or when `readonlyEnd` is called.
-
-Applications can exercise more control over when data from a stage is merged by disabling auto-merging.
-This requires an application to explicitly call `merge` on the stage.
-
-When this function is invoked on the world, it sets all current stages to
-the provided value and sets the default for new stages.
-When this function is invoked on a stage, auto-merging is only set for that specific stage.
--/
-@[extern "lean_flecs_setAutomerge"]
-opaque World.setAutomerge (world : @& World α) (automerge : Bool) : BaseIO Unit
-
-/--
 Configure world to have N stages.
 
 This initializes N stages, which allows applications to defer operations to multiple isolated defer queues.
@@ -254,8 +224,8 @@ Get current stage id.
 The stage id can be used by an application to learn about which stage it is using,
 which typically corresponds with the worker thread id.
 -/
-@[extern "lean_flecs_getStageId"]
-opaque World.getStageId (world : @& World α) : BaseIO Int32
+@[extern "lean_flecs_stageGetId"]
+opaque World.stageGetId (world : @& World α) : BaseIO Int32
 
 /--
 Get stage-specific world pointer.
@@ -296,8 +266,8 @@ The application must ensure that no commands are added to the stage while the st
 
 An asynchronous stage must be cleaned up by `asyncStageFree`.
 -/
-@[extern "lean_flecs_asyncStageNew"]
-opaque World.asyncStageNew (world : @& World α) : BaseIO (World α)
+@[extern "lean_flecs_stageNew"]
+opaque World.stageNew (world : @& World α) : BaseIO (World α)
 
 /--
 Free asynchronous stage.
@@ -305,12 +275,8 @@ Free asynchronous stage.
 The provided stage must be an asynchronous stage.
 If a non-asynchronous stage is provided, the operation will fail.
 -/
-@[extern "lean_flecs_asyncStageFree"]
-opaque World.asyncStageFree (stage : @& World α) : BaseIO Unit
-
-/-- Test whether provided stage is asynchronous.  -/
-@[extern "lean_flecs_stageIsAsync"]
-opaque World.stageIsAsync (stage : @& World α) : BaseIO Bool
+@[extern "lean_flecs_stageFree"]
+opaque World.stageFree (stage : @& World α) : BaseIO Unit
 
 
 /-! # Misc -/
@@ -360,6 +326,14 @@ opaque World.getMaxId (world : @& World α) : BaseIO Entity
 @[extern "lean_flecs_runAperiodic"]
 opaque World.runAperiodic (world : @& World α) (flags : Flags32) : BaseIO Unit
 
+/-- Cleanup empty tables. -/
+@[extern "lean_flecs_deleteEmptyTables"]
+opaque World.deleteEmptyTables
+  (world : @& World α) (id : Id)
+  (clearGeneration : UInt16) (deleteGeneration : UInt16)
+  (minIdCount : Int32) (timeBudgetSeconds : Float)
+  : BaseIO Int32
+
 -- TODO: getWorld (const pointer)
 -- /-- Get world from poly. -/
 -- @[extern "lean_flecs_getWorld"]
@@ -378,9 +352,3 @@ opaque Poly.asWorld (poly : @& Poly α) : BaseIO (Option (World α))
 
 @[extern "lean_flecs_Poly_asQuery"]
 opaque Poly.asQuery (poly : @& Poly α) : BaseIO (Option Query)
-
-@[extern "lean_flecs_Poly_asFilter"]
-opaque Poly.asFilter (poly : @& Poly α) : BaseIO (Option Filter)
-
-@[extern "lean_flecs_Poly_asRule"]
-opaque Poly.asRule (poly : @& Poly α) : BaseIO (Option Rule)

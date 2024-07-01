@@ -6,16 +6,12 @@ LEAN_EXPORT lean_flecs_Id lean_flecs_pair(lean_object* unit) {
     return lean_flecs_Id_toRepr(ECS_PAIR);
 }
 
-LEAN_EXPORT lean_flecs_Id lean_flecs_override(lean_object* unit) {
-    return lean_flecs_Id_toRepr(ECS_OVERRIDE);
+LEAN_EXPORT lean_flecs_Id lean_flecs_autoOverride(lean_object* unit) {
+    return lean_flecs_Id_toRepr(ECS_AUTO_OVERRIDE);
 }
 
 LEAN_EXPORT lean_flecs_Id lean_flecs_toggle(lean_object* unit) {
     return lean_flecs_Id_toRepr(ECS_TOGGLE);
-}
-
-LEAN_EXPORT lean_flecs_Id lean_flecs_and(lean_object* unit) {
-    return lean_flecs_Id_toRepr(ECS_AND);
 }
 
 
@@ -42,12 +38,12 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_identifier(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(ecs_id(EcsIdentifier));
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_iterable(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(ecs_id(EcsIterable));
-}
-
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_poly(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(ecs_id(EcsPoly));
+}
+
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_defaultChildComponent(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(ecs_id(EcsDefaultChildComponent));
 }
 
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_query(lean_obj_arg unit) {
@@ -66,7 +62,7 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_tickSource(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(ecs_id(EcsTickSource));
 }
 
-// TODO: Builtin.pipelineQuery
+// TODO: pipelineQuery constant (linker error, requires building with pipelines enabled, cfg from lake?)
 // LEAN_EXPORT lean_flecs_Entity lean_flecs_c_pipelineQuery(lean_obj_arg unit) {
 //   return lean_flecs_Entity_toRepr(ecs_id(EcsPipelineQuery));
 // }
@@ -119,12 +115,20 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_final(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsFinal);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_dontInherit(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsDontInherit);
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_onInstantiate(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsOnInstantiate);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_alwaysOverride(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsAlwaysOverride);
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_override(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsOverride);
+}
+
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_inherit(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsInherit);
+}
+
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_dontInherit(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsDontInherit);
 }
 
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_symmetric(lean_obj_arg unit) {
@@ -151,8 +155,8 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_oneOf(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsOneOf);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_tag(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsTag);
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_canToggle(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsCanToggle);
 }
 
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_trait(lean_obj_arg unit) {
@@ -167,8 +171,8 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_target(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsTarget);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_union(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsUnion);
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_pairIsTag(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsPairIsTag);
 }
 
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_name(lean_obj_arg unit) {
@@ -271,16 +275,12 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_panic(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsPanic);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_flattenTarget(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(ecs_id(EcsFlattenTarget));
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_sparse(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsSparse);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_flatten(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsFlatten);
-}
-
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_defaultChildComponent(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsDefaultChildComponent);
+LEAN_EXPORT lean_flecs_Entity lean_flecs_c_union(lean_obj_arg unit) {
+  return lean_flecs_Entity_toRepr(EcsUnion);
 }
 
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_predEq(lean_obj_arg unit) {

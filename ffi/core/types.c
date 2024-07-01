@@ -2,19 +2,10 @@
 #include <flecs.h>
 #include <flecs.lean/types.h>
 
-#define LEAN_FLECS_DEFINE_TYPE(name)\
-lean_external_class* lean_flecs_##name##_class;
-
-#define LEAN_FLECS_INITIALIZE_TYPE(name, finalize, foreach)\
-lean_flecs_##name##_class = lean_register_external_class(finalize, foreach);
-
-static void lean_flecs_default_finalize(void* obj) {}
-static void lean_flecs_default_foreach(void* obj, b_lean_obj_arg f) {}
-
-LEAN_FLECS_DEFINE_TYPE(Ptr);
+LEAN_POD_DEFINE_EXTERNAL_CLASS(flecs_Iter)
 
 LEAN_EXPORT lean_obj_res lean_flecs_initialize_types(lean_obj_arg io_) {
-    LEAN_FLECS_INITIALIZE_TYPE(Ptr, lean_flecs_default_finalize, lean_flecs_default_foreach)
+    LEAN_POD_INITIALIZE_EXTERNAL_CLASS(flecs_Iter, lean_pod_free, lean_pod_default_foreach);
     return lean_io_result_mk_ok(lean_box(0));
 }
 

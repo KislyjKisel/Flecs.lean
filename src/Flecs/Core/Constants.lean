@@ -3,56 +3,82 @@ import Flecs.Core.Types
 
 namespace Flecs
 
+open scoped Pod
+
 /-! # Component id flags -/
+
+namespace Id
 
 /-- Indicates that the id is a pair. -/
 define_foreign_constant pair : Id := "lean_flecs_pair"
 
 /-- Automatically override component when it is inherited. -/
-define_foreign_constant override : Id := "lean_flecs_override"
+define_foreign_constant autoOverride : Id := "lean_flecs_autoOverride"
 
 /-- Adds bitset to storage which allows component to be enabled disabled. -/
 define_foreign_constant toggle : Id := "lean_flecs_toggle"
 
-/-- Include all components from entity to which AND is applied. -/
-define_foreign_constant and : Id := "lean_flecs_and"
+end Id
 
 
 /-! # Builtin component ids -/
 
-/-- Value used to quickly check if component is builtin. -/
+namespace Id
+
+/--
+Value used to quickly check if component is builtin.
+This is used to quickly filter out tables with builtin components (for example for `delete`).
+-/
 define_foreign_constant lastInternalComponentId : Id := "lean_flecs_lastInternalComponentId"
 
-/-- The first user-defined component starts from this id. -/
+/--
+The first user-defined component starts from this id.
+Ids up to this number are reserved for builtin components.
+-/
 define_foreign_constant firstUserComponentId : Id := "lean_flecs_firstUserComponentId"
 
-/-- The first user-defined entity starts from this id. -/
+/--
+The first user-defined entity starts from this id.
+Ids up to this number are reserved for builtin entities.
+-/
 define_foreign_constant firstUserEntityId : Id := "lean_flecs_firstUserEntityId"
 
+end Id
 
-namespace Builtin
+namespace Entity
 
+/-- Component component id. -/
 define_foreign_constant component : Entity := "lean_flecs_c_component"
 
+/-- Identifier component id. -/
 define_foreign_constant identifier : Entity := "lean_flecs_c_identifier"
 
-define_foreign_constant iterable : Entity := "lean_flecs_c_iterable"
-
+/-- Poly component id. -/
 define_foreign_constant poly : Entity := "lean_flecs_c_poly"
 
+/-- DefaultChildComponent component id. -/
+define_foreign_constant defaultChildComponent : Entity := "lean_flecs_c_defaultChildComponent"
+
+/-- Tag added to queries. -/
 define_foreign_constant query : Entity := "lean_flecs_c_query"
 
+/-- Tag added to observers. -/
 define_foreign_constant observer : Entity := "lean_flecs_c_observer"
 
+/-- Tag added to systems. -/
 define_foreign_constant system : Entity := "lean_flecs_c_system"
 
+/-- TickSource component id. -/
 define_foreign_constant tickSource : Entity := "lean_flecs_c_tickSource"
 
--- TODO: Builtin.pipelineQuery
+-- TODO: pipelineQuery constant
+-- /-- Pipeline module component ids. -/
 -- define_foreign_constant pipelineQuery : Entity := "lean_flecs_c_pipelineQuery"
 
+/-- Timer component id. -/
 define_foreign_constant timer : Entity := "lean_flecs_c_timer"
 
+/-- RateFilter component id. -/
 define_foreign_constant rateFilter : Entity := "lean_flecs_c_rateFilter"
 
 /-- Root scope for builtin flecs entities. -/
@@ -82,14 +108,32 @@ define_foreign_constant transitive : Entity := "lean_flecs_c_transitive"
 /-- Marks a relationship as reflexive. -/
 define_foreign_constant reflexive : Entity := "lean_flecs_c_reflexive"
 
-/-- Ensures that entity/component cannot be used as target in IsA relationship. -/
+/--
+Ensures that entity/component cannot be used as target in IsA relationship.
+Final can improve the performance of queries as
+they will not attempt to substitute a final component with its subsets.
+-/
 define_foreign_constant final : Entity := "lean_flecs_c_final"
+
+/-- Relationship that specifies component inheritance behavior. -/
+define_foreign_constant onInstantiate : Entity := "lean_flecs_c_onInstantiate"
+
+/--
+Override component on instantiate.
+* This will copy the component from the base entity (IsA target) to the instance.
+  The base component will never be inherited from the prefab.
+-/
+define_foreign_constant override : Entity := "lean_flecs_c_override"
+
+/--
+Inherit component on instantiate.
+* This will inherit (share) the component from the base entity (IsA target).
+  The component can be manually overriden by adding it to the instance.
+-/
+define_foreign_constant inherit : Entity := "lean_flecs_c_inherit"
 
 /-- Ensures that component is never inherited from an IsA target. -/
 define_foreign_constant dontInherit : Entity := "lean_flecs_c_dontInherit"
-
-/-- Ensures a component is always overridden. -/
-define_foreign_constant alwaysOverride : Entity := "lean_flecs_c_alwaysOverride"
 
 /-- Marks relationship as commutative. -/
 define_foreign_constant symmetric : Entity := "lean_flecs_c_symmetric"
@@ -109,8 +153,8 @@ define_foreign_constant «with» : Entity := "lean_flecs_c_with"
 /-- Ensure that relationship target is child of specified entity. -/
 define_foreign_constant oneOf : Entity := "lean_flecs_c_oneOf"
 
-/-- Can be added to relationship to indicate that it should never hold data, even when it or the relationship target is a component. -/
-define_foreign_constant tag : Entity := "lean_flecs_c_tag"
+/-- Mark a component as toggleable with `enableId`/`disableId`. -/
+define_foreign_constant canToggle : Entity := "lean_flecs_c_canToggle"
 
 /-- Can be added to components to indicate it is a trait. -/
 define_foreign_constant trait : Entity := "lean_flecs_c_trait"
@@ -121,8 +165,11 @@ define_foreign_constant relationship : Entity := "lean_flecs_c_relationship"
 /-- Ensure that an entity is always used in pair as target. -/
 define_foreign_constant target : Entity := "lean_flecs_c_target"
 
-/-- Tag to indicate that relationship is stored as union. -/
-define_foreign_constant union : Entity := "lean_flecs_c_union"
+/--
+Can be added to relationship to indicate that it should never hold data,
+even when it or the relationship target is a component.
+-/
+define_foreign_constant pairIsTag : Entity := "lean_flecs_c_pairIsTag"
 
 /-- Tag to indicate name identifier. -/
 define_foreign_constant name : Entity := "lean_flecs_c_name"
@@ -190,61 +237,85 @@ define_foreign_constant onDelete : Entity := "lean_flecs_c_onDelete"
 /-- Relationship used to define what should happen when a target entity (second element of a pair) is deleted. -/
 define_foreign_constant onDeleteTarget : Entity := "lean_flecs_c_onDeleteTarget"
 
-/-- Remove cleanup policy. -/
+/--
+Remove cleanup policy.
+Must be used as target in pair with `onDelete` or `onDeleteTarget`.
+-/
 define_foreign_constant remove : Entity := "lean_flecs_c_remove"
 
-/-- Delete cleanup policy. -/
+/--
+Delete cleanup policy.
+Must be used as target in pair with `onDelete` or `onDeleteTarget`.
+-/
 define_foreign_constant delete : Entity := "lean_flecs_c_delete"
 
-/-- Panic cleanup policy. -/
+/--
+Panic cleanup policy.
+Must be used as target in pair with `onDelete` or `onDeleteTarget`.
+-/
 define_foreign_constant panic : Entity := "lean_flecs_c_panic"
 
-/-- Component that stores data for flattened relationships. -/
-define_foreign_constant flattenTarget : Entity := "lean_flecs_c_flattenTarget"
+/-- Mark component as sparse. -/
+define_foreign_constant sparse : Entity := "lean_flecs_c_sparse"
 
-/-- Tag added to root entity to indicate its subtree should be flattened. -/
-define_foreign_constant flatten : Entity := "lean_flecs_c_flatten"
+/-- Tag to indicate that relationship is stored as union. -/
+define_foreign_constant union : Entity := "lean_flecs_c_union"
 
-/-- Used like (EcsDefaultChildComponent, Component). -/
-define_foreign_constant defaultChildComponent : Entity := "lean_flecs_c_defaultChildComponent"
-
+/-- Marker used to indicate `$var == ...` matching in queries. -/
 define_foreign_constant predEq : Entity := "lean_flecs_c_predEq"
 
+/-- Marker used to indicate `$var == "name"` matching in queries. -/
 define_foreign_constant predMatch : Entity := "lean_flecs_c_predMatch"
 
+/-- Marker used to indicate `$var ~= "pattern"` matching in queries. -/
 define_foreign_constant predLookup : Entity := "lean_flecs_c_predLookup"
 
+/-- Marker used to indicate the start of a scope (`{`) in queries. -/
 define_foreign_constant scopeOpen : Entity := "lean_flecs_c_scopeOpen"
 
+/-- Marker used to indicate the end of a scope (`}`) in queries. -/
 define_foreign_constant scopeClose : Entity := "lean_flecs_c_scopeClose"
 
 /-- Tag used to indicate query is empty. -/
 define_foreign_constant empty : Entity := "lean_flecs_c_empty"
 
+/-- Pipeline component id. -/
 define_foreign_constant pipeline : Entity := "lean_flecs_c_pipeline"
 
+/-- OnStart pipeline phase. -/
 define_foreign_constant onStart : Entity := "lean_flecs_c_onStart"
 
+/-- PreFrame pipeline phase. -/
 define_foreign_constant preFrame : Entity := "lean_flecs_c_preFrame"
 
+/-- OnLoad pipeline phase. -/
 define_foreign_constant onLoad : Entity := "lean_flecs_c_onLoad"
 
+/-- PostLoad pipeline phase. -/
 define_foreign_constant postLoad : Entity := "lean_flecs_c_postLoad"
 
+/-- PreUpdate pipeline phase. -/
 define_foreign_constant preUpdate : Entity := "lean_flecs_c_preUpdate"
 
+/-- OnUpdate pipeline phase. -/
 define_foreign_constant onUpdate : Entity := "lean_flecs_c_onUpdate"
 
+/-- OnValidate pipeline phase. -/
 define_foreign_constant onValidate : Entity := "lean_flecs_c_onValidate"
 
+/-- PostUpdate pipeline phase. -/
 define_foreign_constant postUpdate : Entity := "lean_flecs_c_postUpdate"
 
+/-- PreStore pipeline phase. -/
 define_foreign_constant preStore : Entity := "lean_flecs_c_preStore"
 
+/-- OnStore pipeline phase. -/
 define_foreign_constant onStore : Entity := "lean_flecs_c_onStore"
 
+/-- PostFrame pipeline phase. -/
 define_foreign_constant postFrame : Entity := "lean_flecs_c_postFrame"
 
+/-- Phase pipeline phase. -/
 define_foreign_constant phase : Entity := "lean_flecs_c_phase"
 
-end Builtin
+end Entity

@@ -12,8 +12,8 @@ Create new entity id.
 This operation returns an unused entity id.
 This operation is guaranteed to return an empty entity as it does not use values set by `setScope` or `setWith`.
 -/
-@[extern "lean_flecs_newId"]
-opaque World.newId (world : @& World α) : BaseIO Entity
+@[extern "lean_flecs_new"]
+opaque World.new (world : @& World α) : BaseIO Entity
 
 /--
 Create new low id.
@@ -67,6 +67,15 @@ If the entity passed to `delete` is not alive, the operation will have no side e
 @[extern "lean_flecs_delete"]
 opaque World.delete (world : @& World α) (entity : Entity) : BaseIO Unit
 
+/--
+Delete all entities with the specified id.
+
+This will delete all entities (tables) that have the specified id.
+The id may be a wildcard and/or a pair.
+-/
+@[extern "lean_flecs_deleteWith"]
+opaque World.deleteWith (world : @& World α) (id : Id) : BaseIO Unit
+
 -- TODO: ecs_new_w_table ecs_entity_init ecs_delete_with ecs_bulk_new_w_id ecs_bulk_init
 
 
@@ -91,12 +100,23 @@ If the entity does not have the id, this operation will have no side effects.
 opaque World.removeId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
 
 /--
-Add override for (component) id.
+Add auto override for (component) id.
+An auto override is a component that is automatically added to an entity when it is instantiated from a prefab.
+Auto overrides are added to the entity that is inherited from (usually a prefab).
+An auto override is equivalent to a manual override.
+This operation is equivalent to manually adding the id with the `autoOverride` bit applied.
 
-[docs](https://www.flecs.dev/flecs/group__adding__removing.html#ga0d3524b1a92effae1dc7c783f37a2acd)
+When a component is overridden and inherited from a prefab, the value from
+the prefab component is copied to the instance. When the component is not
+inherited from a prefab, it is added to the instance as if using ecs_add_id.
+
+Overriding is the default behavior on prefab instantiation. Auto overriding
+is only useful for components with the (OnInstantiate, Inherit) trait.
+When a component has the (OnInstantiate, DontInherit) trait and is overridden
+the component is added, but the value from the prefab will not be copied.
 -/
-@[extern "lean_flecs_overrideId"]
-opaque World.overrideId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
+@[extern "lean_flecs_autoOverrideId"]
+opaque World.autoOverrideId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
 
 /--
 Clear all components.
@@ -160,3 +180,23 @@ if it has not been disabled by `enableId`.
 -/
 @[extern "lean_flecs_isEnabledId"]
 opaque World.isEnabledId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
+
+
+/-! # Getting and setting -/
+
+-- TODO
+
+
+/-! # Liveliness -/
+
+-- TODO
+
+
+/-! # Information -/
+
+-- TODO
+
+
+/-! # Names -/
+
+-- TODO

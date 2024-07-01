@@ -1,10 +1,13 @@
 import Pod.Meta
 import Pod.Int
+import Pod.Storable
 import Flecs.Core.Defines
 
-open Pod (Int16 Int32 Int64)
+open Pod (Int16 Int32 Int64 Storable)
 
 namespace Flecs
+
+open scoped Pod
 
 variable {α : Type}
 
@@ -35,6 +38,7 @@ instance : Ord Id := inferInstanceAs (Ord UInt64)
 instance : OfNat Id 0 := inferInstanceAs (OfNat UInt64 0)
 instance : Repr Id := inferInstanceAs (Repr UInt64)
 instance : ToString Id := inferInstanceAs (ToString UInt64)
+instance : Storable Id := inferInstanceAs (Storable UInt64)
 
 abbrev Entity := Id
 
@@ -47,14 +51,15 @@ define_foreign_type World (α : Type)
 /-- A table stores entities and components for a specific type. -/
 define_foreign_type Table
 
-/-- A filter is an iterable data structure that describes a query. -/
-define_foreign_type Filter
+/-- Range in table. Leave both `offset` and `count` to `0` to cover entire table. -/
+structure TableRange where
+  table : Table
+  offset : Int32
+  count : Int32
+deriving Nonempty
 
-/-- A query that caches its results. -/
+/-- A query. -/
 define_foreign_type Query
-
-/-- A rule is a query with advanced graph traversal features. -/
-define_foreign_type Rule
 
 -- Unused
 -- /-- An observer is a system that is invoked when an event matches its query. -/
@@ -97,8 +102,6 @@ This is the current list of types in the flecs API that can be used as an `Poly`
 * `World`
 * `Stage`
 * `Query`
-* `Filter`
-* `Rule`
 
 Functions that accept an `Poly` argument can accept objects of these types.
 If the object does not have the requested mixin the API will throw an assert.
@@ -121,16 +124,6 @@ private unsafe
 def Poly.ofQueryImpl (Query : Query) : Poly α := unsafeCast Query
 @[implemented_by ofQueryImpl]
 opaque Poly.ofQuery (Query : Query) : Poly α
-
-private unsafe
-def Poly.ofFilterImpl (Filter : Filter) : Poly α := unsafeCast Filter
-@[implemented_by ofFilterImpl]
-opaque Poly.ofFilter (Filter : Filter) : Poly α
-
-private unsafe
-def Poly.ofRuleImpl (Rule : Rule) : Poly α := unsafeCast Rule
-@[implemented_by ofRuleImpl]
-opaque Poly.ofRule (Rule : Rule) : Poly α
 
 -- Unused
 -- /-- Type that stores poly mixins. -/
@@ -173,131 +166,150 @@ def GroupByAction (α) := World α → Table → Id → BaseIO UInt64
 
 /-! # Query descriptor types -/
 
+/-- Specify read/write access for term. -/
+inductive InOutKind where
+/-- `inOut` for regular terms, `in` for shared terms. -/
+| default
+/-- Term is neither read not written. -/
+| none
+/-- Same as `none` + prevents term from triggering observers -/
+| filter
+/-- Term is both read and written. -/
+| inOut
+/-- Term is only read. -/
+| in
+/-- Term is only written. -/
+| out
+deriving Repr, Inhabited, DecidableEq
+
+/-- Specify operator for term. -/
+inductive OperKind where
+/-- The term must match. -/
+| and
+/-- On of the terms in an or chain must match. (todo: what?) -/
+| or
+/-- The term must not match. -/
+| not
+/-- The term may match. -/
+| optional
+/-- Term must match all components from term id. -/
+| andFrom
+/-- Term must match at least one component from term id. -/
+| orFrom
+/-- Term must match none of the components from term id. -/
+| notFrom
+deriving Repr, Inhabited, DecidableEq
+
+/-- Specify cache policy for query -/
+inductive QueryCacheKind where
+/-- Behavior determined by query creation context -/
+| default
+/-- Cache query terms that are cachable -/
+| auto
+/-- Require that all query terms can be cached -/
+| all
+/-- No caching -/
+| none
+deriving Repr, Inhabited, DecidableEq
+
 structure TermIdFlags where
-  val : UInt32
+  val : UInt64
 deriving Repr, Inhabited
 
 instance : OfNat TermIdFlags 0 := ⟨⟨0⟩⟩
 instance : OrOp TermIdFlags where
   or a b := .mk (a.val ||| b.val)
 
-def TermIdFlags.self := TermIdFlags.mk ((1 : UInt32) <<< 1)
-def TermIdFlags.up := TermIdFlags.mk ((1 : UInt32) <<< 2)
-def TermIdFlags.down := TermIdFlags.mk ((1 : UInt32) <<< 3)
-def TermIdFlags.traverseAll := TermIdFlags.mk ((1 : UInt32) <<< 4)
-def TermIdFlags.cascade := TermIdFlags.mk ((1 : UInt32) <<< 5)
-def TermIdFlags.desc := TermIdFlags.mk ((1 : UInt32) <<< 6)
-def TermIdFlags.parent := TermIdFlags.mk ((1 : UInt32) <<< 7)
-def TermIdFlags.isVariable := TermIdFlags.mk ((1 : UInt32) <<< 8)
-def TermIdFlags.isEntity := TermIdFlags.mk ((1 : UInt32) <<< 9)
-def TermIdFlags.isName := TermIdFlags.mk ((1 : UInt32) <<< 10)
-def TermIdFlags.filter := TermIdFlags.mk ((1 : UInt32) <<< 11)
-def TermIdFlags.traverseFlags := up ||| down ||| traverseAll ||| self ||| cascade ||| desc ||| parent
 
-structure TermFlags where
-  val : UInt16
-deriving Repr, Inhabited
+/--
+Match on self.
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.self := TermIdFlags.mk ((1 : UInt64) <<< 63)
 
-instance : OfNat TermFlags 0 := ⟨⟨0⟩⟩
-instance : OrOp TermFlags where
-  or a b := .mk (a.val ||| b.val)
+/--
+Match by traversing upwards.
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.up := TermIdFlags.mk ((1 : UInt64) <<< 62)
 
-def TermFlags.matchAny := TermFlags.mk ((1 : UInt16) <<< 0)
-def TermFlags.matchAnySrc := TermFlags.mk ((1 : UInt16) <<< 1)
-def TermFlags.srcFirstEq := TermFlags.mk ((1 : UInt16) <<< 2)
-def TermFlags.srcSecondEq := TermFlags.mk ((1 : UInt16) <<< 3)
-def TermFlags.transitive := TermFlags.mk ((1 : UInt16) <<< 4)
-def TermFlags.reflexive := TermFlags.mk ((1 : UInt16) <<< 5)
-def TermFlags.idInherited := TermFlags.mk ((1 : UInt16) <<< 6)
-def TermFlags.isTrivial := TermFlags.mk ((1 : UInt16) <<< 7)
-def TermFlags.noData := TermFlags.mk ((1 : UInt16) <<< 8)
-def TermFlags.matchDisabled := TermFlags.mk ((1 : UInt16) <<< 7)
-def TermFlags.matchPrefab := TermFlags.mk ((1 : UInt16) <<< 8)
+/--
+Traverse relationship transitively.
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.trav := TermIdFlags.mk ((1 : UInt64) <<< 61)
 
-inductive InOutKind.Is : UInt32 → Prop where
-  | default : InOutKind.Is 0
-  | none : InOutKind.Is 1
-  | inOut : InOutKind.Is 2
-  | in : InOutKind.Is 3
-  | out : InOutKind.Is 4
+/--
+Sort results breadth first.
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.cascade := TermIdFlags.mk ((1 : UInt64) <<< 60)
 
-/-- Specify read/write access for term. -/
-def InOutKind : Type := Subtype InOutKind.Is
+/--
+Iterate groups in descending order.
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.desc := TermIdFlags.mk ((1 : UInt64) <<< 59)
 
-/-- `inOut` for regular terms, `in` for shared terms. -/
-def InOutKind.default : InOutKind := ⟨0, .default⟩
-/-- Term is neither read not written. -/
-def InOutKind.none : InOutKind := ⟨1, .none⟩
-/-- Term is both read and written. -/
-def InOutKind.inOut : InOutKind := ⟨2, .inOut⟩
-/-- Term is only read. -/
-def InOutKind.in : InOutKind := ⟨3, .in⟩
-/-- Term is only written. -/
-def InOutKind.out : InOutKind := ⟨4, .out⟩
+/--
+Term id is a variable.
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.isVariable := TermIdFlags.mk ((1 : UInt64) <<< 58)
 
-instance : Inhabited InOutKind := ⟨.default⟩
+/--
+Term id is an entity.
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.isEntity := TermIdFlags.mk ((1 : UInt64) <<< 57)
 
-instance : Repr InOutKind where
-  reprPrec x p := reprPrec x.val p
+/--
+Term id is a name (don't attempt to lookup as entity).
+Can be combined with other term flags on the `TermRef.id` field.
+-/
+def TermIdFlags.isName := TermIdFlags.mk ((1 : UInt64) <<< 56)
 
-inductive OperKind.Is : UInt32 → Prop where
-  | and : OperKind.Is 0
-  | or : OperKind.Is 1
-  | not : OperKind.Is 2
-  | optional : OperKind.Is 3
-  | andFrom : OperKind.Is 4
-  | orFrom : OperKind.Is 5
-  | notFrom : OperKind.Is 6
+/-- All term traversal flags. Can be combined with other term flags on the `TermRef.id` field. -/
+def traverseFlags := TermIdFlags.self ||| TermIdFlags.up ||| TermIdFlags.trav ||| TermIdFlags.cascade ||| TermIdFlags.desc
 
-/-- Specify operator for term. -/
-def OperKind : Type := Subtype OperKind.Is
+/-- All term reference kind flags. Can be combined with other term flags on the `TermRef.id` field. -/
+def termRefFlags := traverseFlags ||| TermIdFlags.isVariable ||| TermIdFlags.isEntity ||| TermIdFlags.isName
 
-/-- The term must match. -/
-def OperKind.and : OperKind := ⟨0, .and⟩
-/-- On of the terms in an or chain must match. (todo: what?) -/
-def OperKind.or : OperKind := ⟨1, .or⟩
-/-- The term must not match. -/
-def OperKind.not : OperKind := ⟨2, .not⟩
-/-- The term may match. -/
-def OperKind.optional : OperKind := ⟨3, .optional⟩
-/-- Term must match all components from term id. -/
-def OperKind.andFrom : OperKind := ⟨4, .andFrom⟩
-/-- Term must match at least one component from term id. -/
-def OperKind.orFrom : OperKind := ⟨5, .orFrom⟩
-/-- Term must match none of the components from term id. -/
-def OperKind.notFrom : OperKind := ⟨6, .notFrom⟩
-
-instance : Inhabited OperKind := ⟨.and⟩
-
-instance : Repr OperKind where
-  reprPrec x p := reprPrec x.val p
-
-/-- Type that describes a single identifier in a term. -/
-structure TermId where
+/-- Type that describes a reference to an entity or variable in a term. -/
+structure TermRef where
   /--
+  Entity id.
   If left to 0 and flags does not specify whether id is an entity or a variable
-  the id will be initialized to `Builtin.this`.
-  To explicitly set the id to 0, leave the `id` member to 0 and set `isEntity` in `flags`. -/
+  the id will be initialized to `Entity.this`.
+  To explicitly set the id to 0, leave the id member to 0 and set `TermIdFlags.isEntity` in flags.
+  -/
   id : Entity
-  name : Option String
-  /-- Relationship to traverse when looking for the component. -/
-  trav : Entity
-  flags : TermIdFlags
+  /--
+  Name.
+  This can be either the variable name (when `TermIdFlags.isVariable` flag is set) or an entity name.
+  -/
+  name : String
 deriving Repr, Inhabited
 
+/-- Type that describes a term (single element in a query). -/
 structure Term where
   /--
   Component id to be matched by term.
   Can be set directly, or will be populated from the first/second members, which provide more flexibility.
   -/
-  id : Id
-  src : Option TermId := none
+  id : Id := 0
+  /-- Source of term. -/
+  src : Option TermRef := none
   /-- Component or first element of pair. -/
-  first : Option TermId := none
+  first : Option TermRef := none
   /-- Second element of pair. -/
-  second : Option TermId := none
+  second : Option TermRef := none
+  /-- Access to contents matched by term. -/
   inout : InOutKind := .default
+  /-- Operator of term. -/
   oper : OperKind := .and
+  /-- Index of field for term in iterator. -/
+  fieldIndex : Int16
 deriving Repr, Inhabited
 
 

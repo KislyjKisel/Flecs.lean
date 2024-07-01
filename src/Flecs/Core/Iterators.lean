@@ -10,6 +10,21 @@ namespace Flecs
 variable {α}
 
 /--
+Progress any iterator.
+
+This operation is useful in combination with iterators for which it is not known what created them.
+Example use cases are functions that should accept any kind of iterator (such as serializers)
+or iterators created from poly objects.
+
+This operation is slightly slower than using a type-specific iterator (e.g. `Iter.filterNext`,
+`Iter.queryNext`) as it has to call a function pointer which introduces a level of indirection.
+
+Returns true if iterator has more results, false if not.
+-/
+@[extern "lean_flecs_Iter_next"]
+opaque Iter.next (it : @& Iter) : BaseIO Bool
+
+/--
 This operation cleans up any resources associated with the iterator.
 
 This operation should only be used when an iterator is not iterated until completion
@@ -56,19 +71,86 @@ Returns 0 if no entities were matched.
 opaque Iter.first (it : @& Iter) : BaseIO Entity
 
 /--
-Progress any iterator.
-
-This operation is useful in combination with iterators for which it is not known what created them.
-Example use cases are functions that should accept any kind of iterator (such as serializers)
-or iterators created from poly objects.
-
-This operation is slightly slower than using a type-specific iterator (e.g. `Iter.filterNext`,
-`Iter.queryNext`) as it has to call a function pointer which introduces a level of indirection.
-
-Returns true if iterator has more results, false if not.
+Set value for iterator variable.
+This constrains the iterator to return only results for which the variable equals the specified value.
+The default value for all variables is `.wildcard`,
+which means the variable can assume any value.
 -/
-@[extern "lean_flecs_Iter_next"]
-opaque Iter.next (it : @& Iter) : BaseIO Bool
+@[extern "lean_flecs_Iter_setVar"]
+opaque Iter.setVar (it : @& Iter) (varId : Int32) (entity : Entity) : BaseIO Unit
+
+/--
+Same as `Iter.setVar`, but for a table.
+This constrains the variable to all entities in a table.
+-/
+@[extern "lean_flecs_Iter_setVarAsTable"]
+opaque Iter.setVarAsTable (it : @& Iter) (varId : Int32) (table : @& Table) : BaseIO Unit
+
+/--
+Same as `Iter.setVar`, but for a range of entities
+This constrains the variable to a range of entities in a table.
+-/
+@[extern "lean_flecs_Iter_setVarAsRange"]
+opaque Iter.setVarAsRange (it : @& Iter) (varId : Int32) (range : @& TableRange) : BaseIO Unit
+
+/--
+Get value of iterator variable as entity.
+A variable can be interpreted as entity if it is set to an entity, or if it
+is set to a table range with count 1.
+
+This operation can only be invoked on valid iterators.
+The variable index must be smaller than the total number of variables provided by the iterator.
+(`Iter.variableCount`).
+-/
+@[extern "lean_flecs_Iter_getVar"]
+opaque Iter.getVar (it : @& Iter) (varId : Int32) : BaseIO Entity
+
+/--
+Get value of iterator variable as table.
+A variable can be interpreted as table if it is set as table range with
+both offset and count set to 0, or if offset is 0 and count matches the
+number of elements in the table.
+
+This operation can only be invoked on valid iterators.
+The variable index must be smaller than the total number of variables provided by the iterator
+(`Iter.variableCount`).
+-/
+@[extern "lean_flecs_Iter_getVarAsTable"]
+opaque Iter.getVarAsTable (it : @& Iter) (varId : Int32) : BaseIO Table
+
+/--
+Get value of iterator variable as table range.
+A value can be interpreted as table range if it is set as table range, or if
+it is set to an entity with a non-empty type (the entity must have at least
+one component, tag or relationship in its type).
+
+This operation can only be invoked on valid iterators.
+The variable index must be smaller than the total number of variables provided by the iterator
+(`Iter.variableCount`).
+-/
+@[extern "lean_flecs_Iter_getVarAsRange"]
+opaque Iter.getVarAsRange (it : @& Iter) (varId : Int32) : BaseIO TableRange
+
+/--
+Returns whether variable is constrained.
+This operation returns true for variables set by one of the `Iter.setVar*` operations.
+
+A constrained variable is guaranteed not to change values while results are being iterated.
+-/
+@[extern "lean_flecs_Iter_varIsConstrained"]
+opaque Iter.varIsConstrained (it : @& Iter) (varId : Int32) : BaseIO Bool
+
+/--
+Returns whether current iterator result has changed.
+This operation must be used in combination with a query that supports change detection (e.g. is cached).
+The operation returns whether the currently iterated result
+has changed since the last time it was iterated by the query.
+
+Change detection works on a per-table basis.
+Changes to individual entities cannot be detected this way.
+-/
+@[extern "lean_flecs_Iter_changed"]
+opaque Iter.changed (it : @& Iter) : BaseIO Bool
 
 /--
 Convert iterator to string.
@@ -82,6 +164,10 @@ To convert all data, the application has to manually call the next function and 
 @[extern "lean_flecs_Iter_str"]
 opaque Iter.str (it : @& Iter) : BaseIO String
 
+-- TODO:
+-- ecs_page_iter ecs_page_next
+-- ecs_worker_iter ecs_worker_next
+
 /--
 This operation retrieves a pointer to an array of data that belongs to the term in the query.
 The index refers to the location of the term in the query, and starts counting from one.
@@ -89,7 +175,7 @@ The index refers to the location of the term in the query, and starts counting f
 [docs](https://www.flecs.dev/flecs/group__iterator.html#ga2ac48f96b44d1ed4e69bc28d96029b7a)
 -/
 @[extern "lean_flecs_Iter_fieldWithSize"]
-opaque Iter.fieldWithSize (it : @& Iter) (α : Type) [S : Storable α] (index : Int32) : BaseIO (BytesRefMut IO.RealWorld S.byteSize S.alignment)
+opaque Iter.fieldWithSize (it : @& Iter) (α : Type) [S : @& Storable α] (index : Int32) : BaseIO (BytesRefMut IO.RealWorld S.byteSize S.alignment)
 
 /-- `Iter.fieldWithSize` alternative for boxed components. -/
 @[extern "lean_flecs_Iter_field"]
@@ -121,8 +207,8 @@ Return index of matched table column.
 This function only returns column indices for fields that have been matched on the $this variable.
 Fields matched on other tables will return -1.
 -/
-@[extern "lean_flecs_Iter_fieldColumnIndex"]
-opaque Iter.fieldColumnIndex (it : @& Iter) (index : Int32) : BaseIO Int32
+@[extern "lean_flecs_Iter_fieldColumn"]
+opaque Iter.fieldColumn (it : @& Iter) (index : Int32) : BaseIO Int32
 
 /-- The field source is the entity on which the field was matched. -/
 @[extern "lean_flecs_Iter_fieldSrc"]
@@ -143,10 +229,3 @@ Fields for which this operation returns true return arrays with it->count values
 -/
 @[extern "lean_flecs_Iter_fieldIsSelf"]
 opaque Iter.fieldIsSelf (it : @& Iter) (index : Int32) : BaseIO Bool
-
--- TODO:
--- ecs_iter_poly
--- ecs_iter_set_var ecs_iter_set_var_as_table ecs_iter_set_var_as_range
--- ecs_iter_get_var ecs_iter_get_var_as_table ecs_iter_get_var_as_range
--- ecs_iter_var_is_constrained
--- ecs_page_iter ecs_page_next ecs_worker_iter ecs_worker_next

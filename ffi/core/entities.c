@@ -6,9 +6,9 @@
 
 // Creating & Deleting
 
-LEAN_EXPORT lean_obj_res lean_flecs_newId(b_lean_obj_arg world, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_new(b_lean_obj_arg world, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(
-        ecs_new_id(lean_flecs_World_fromRepr(world))
+        ecs_new(lean_flecs_World_fromRepr(world))
     ));
 }
 
@@ -24,11 +24,6 @@ LEAN_EXPORT lean_obj_res lean_flecs_newWithId(b_lean_obj_arg world, uint64_t id,
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_delete(b_lean_obj_arg world, uint64_t entity, lean_obj_arg io_) {
-    ecs_delete(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
-    return lean_io_result_mk_ok(lean_box(0));
-}
-
 LEAN_EXPORT lean_obj_res lean_flecs_clone(b_lean_obj_arg world, uint64_t dst, uint64_t src, uint8_t copyValue, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(ecs_clone(
         lean_flecs_World_fromRepr(world),
@@ -36,6 +31,16 @@ LEAN_EXPORT lean_obj_res lean_flecs_clone(b_lean_obj_arg world, uint64_t dst, ui
         lean_flecs_Entity_fromRepr(src),
         copyValue
     )));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_delete(b_lean_obj_arg world, lean_flecs_Entity entity, lean_obj_arg io_) {
+    ecs_delete(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_deleteWith(b_lean_obj_arg world, lean_flecs_Id id, lean_obj_arg io_) {
+    ecs_delete_with(lean_flecs_World_fromRepr(world), lean_flecs_Id_fromRepr(id));
+    return lean_io_result_mk_ok(lean_box(0));
 }
 
 
@@ -59,8 +64,8 @@ LEAN_EXPORT lean_obj_res lean_flecs_removeId(lean_flecs_World world, lean_flecs_
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_overrideId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
-    ecs_override_id(
+LEAN_EXPORT lean_obj_res lean_flecs_autoOverrideId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+    ecs_auto_override_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
         lean_flecs_Id_fromRepr(id)
