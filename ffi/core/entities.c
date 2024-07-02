@@ -24,6 +24,18 @@ LEAN_EXPORT lean_obj_res lean_flecs_newWithId(b_lean_obj_arg world, uint64_t id,
     ));
 }
 
+LEAN_EXPORT lean_obj_res lean_flecs_World_entityInit(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
+    ecs_entity_desc_t desc_c = lean_flecs_EntityDesc_fromRepr(desc);
+    ecs_entity_t entity = ecs_entity_init(lean_flecs_World_fromRepr(world), &desc_c);
+    if (desc_c.add) {
+        free((void*)desc_c.add);
+    }
+    if (entity == 0 && desc_c.name) {
+        ecs_os_free((void*)desc_c.name);
+    }
+    return lean_io_result_mk_ok(lean_flecs_Entity_box(entity));
+}
+
 LEAN_EXPORT lean_obj_res lean_flecs_clone(b_lean_obj_arg world, uint64_t dst, uint64_t src, uint8_t copyValue, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(ecs_clone(
         lean_flecs_World_fromRepr(world),

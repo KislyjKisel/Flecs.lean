@@ -15,8 +15,8 @@ The resulting expression can be parsed to create the same query.
 opaque Query.str (query : @& Query β) : BaseIO String
 
 /-- Create a query. -/
-@[extern "lean_flecs_Query_init"]
-opaque Query.init (world : @& World α) (desc : QueryDesc α β) : BaseIO (Query β)
+@[extern "lean_flecs_World_queryInit"]
+opaque World.queryInit (world : @& World α) (desc : QueryDesc α β) : BaseIO (Query β)
 
 /--
 This operation destroys a query and its resources.

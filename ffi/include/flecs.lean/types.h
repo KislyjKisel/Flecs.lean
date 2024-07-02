@@ -98,6 +98,64 @@ static inline ecs_table_range_t lean_flecs_TableRange_unbox(b_lean_obj_arg range
 
 // Miscellaneous types
 
+#define LEAN_FLECS_EntityDesc_LAYOUT 0, 6, 0, 2, 0, 0, 1
+#define LEAN_FLECS_EntityDesc_id U64, 0, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_parent U64, 1, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_name BOX, 0, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_sep BOX, 1, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_rootSep BOX, 2, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_symbol BOX, 3, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_useLowId U8, 0, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_add BOX, 4, LEAN_FLECS_EntityDesc_LAYOUT
+#define LEAN_FLECS_EntityDesc_addExpr BOX, 5, LEAN_FLECS_EntityDesc_LAYOUT
+
+// `.add` must be freed; `.name` assumed to be freed by flecs;
+// `symbol` is ignored (appears to be unused by `ecs_entity_init`);
+// some contained string pointers' lifetimes are tied to the `desc` argument.
+static inline ecs_entity_desc_t lean_flecs_EntityDesc_fromRepr(b_lean_obj_arg desc) {
+    ecs_entity_desc_t desc_c = {};
+    desc_c.id = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_id);
+    desc_c.parent = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_parent);
+    // Mutated and stored by `ecs_entity_init`; empty = none.
+    // TODO: not freed?
+    lean_object* name = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_name);
+    if (lean_option_is_some(name)) {
+        lean_object* name_v = lean_ctor_get(name, 0);
+        if (lean_string_byte_size(name_v) > 0) {
+            desc_c.name = ecs_os_strdup(lean_string_cstr(name_v));
+        }
+    }
+    lean_object* sep = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_sep);
+    if (lean_option_is_some(sep)) {
+        desc_c.sep = lean_string_cstr(lean_ctor_get(sep, 0));
+    }
+    lean_object* rootSep = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_rootSep);
+    if (lean_option_is_some(rootSep)) {
+        desc_c.root_sep = lean_string_cstr(lean_ctor_get(rootSep, 0));
+    }
+    // TODO: ecs_entity_init: `symbol` unused?
+    // lean_object* symbol = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_symbol);
+    // if (lean_option_is_some(symbol)) {
+    //     desc_c.symbol = lean_string_cstr(lean_ctor_get(symbol, 0));
+    // }
+    desc_c.use_low_id = 0 != LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_useLowId);
+    lean_object* add = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_add);
+    size_t add_size = lean_array_size(add);
+    if (add_size > 0) {
+        ecs_id_t* add_c = malloc(sizeof(ecs_id_t) * (add_size + 1));
+        for (size_t i = 0; i < add_size; ++i) {
+            add_c[i] = lean_flecs_Id_unbox(lean_array_get_core(add, i));
+        }
+        add_c[add_size] = 0;
+        desc_c.add = add_c;
+    }
+    lean_object* addExpr = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_addExpr);
+    if (lean_option_is_some(addExpr)) {
+        desc_c.add_expr = lean_string_cstr(lean_ctor_get(addExpr, 0));
+    }
+    return desc_c;
+}
+
 LEAN_POD_PTR_ALIAS(flecs_BuildInfo, const ecs_build_info_t*)
 LEAN_POD_PTR_ALIAS(flecs_WorldInfo, const ecs_world_info_t*)
 LEAN_POD_PTR_ALIAS(flecs_QueryGroupInfo, const ecs_query_group_info_t*)

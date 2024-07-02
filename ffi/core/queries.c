@@ -62,7 +62,7 @@ static void lean_flecs_GroupDeleteAction_wrapper(ecs_world_t* world, uint64_t gr
     lean_dec_ref(lean_apply_4(callback, lean_flecs_World_box(world), lean_box_uint64(group_id), group_by_ctx, lean_box(0)));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_Query_init(lean_flecs_World world, lean_obj_arg desc, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_queryInit(lean_flecs_World world, lean_obj_arg desc, lean_obj_arg io_) {
     ecs_query_desc_t desc_c = {};
     desc_c.binding_ctx = desc; // to keep strings alive
     desc_c.binding_ctx_free = lean_flecs_obj_ctx_free;

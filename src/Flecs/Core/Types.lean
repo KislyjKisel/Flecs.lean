@@ -421,6 +421,45 @@ structure QueryDesc (α β : Type) where
 -- @[extern "lean_flecs_Value_type"]
 -- opaque Value.type (value : @& Value) : Entity
 
+structure EntityDesc where
+  /-- Set to modify existing entity (optional) -/
+  id : Entity := 0
+  /-- Parent entity. -/
+  parent : Entity := 0
+  /--
+  Name of the entity.
+  If no entity is provided, an entity with this name will be looked up first.
+  When an entity is provided, the name will be verified with the existing entity.
+  -/
+  name : Option String := none
+  /--
+  Optional custom separator for hierarchical names.
+  Leave to `none` for default (`"."`) separator.
+  Set to an empty string to prevent tokenization of name.
+  -/
+  sep : Option String := none
+  /-- Optional, used for identifiers relative to root -/
+  rootSep : Option String := none
+  /--
+  Optional entity symbol.
+  A symbol is an unscoped identifier that can be used to lookup an entity.
+  The primary use case for this is to associate the entity with a
+  language identifier, such as a type or function name, where these
+  identifiers differ from the name they are registered with in flecs.
+  For example, C type "EcsPosition" might be registered as
+  "flecs.components.transform.Position", with the symbol set to "EcsPosition".
+  -/
+  symbol : Option String := none
+  /--
+  When set to true, a low id (typically reserved for components)
+  will be used to create the entity, if no id is specified.
+  -/
+  useLowId : Bool := false
+  /-- Array of ids to add to the entity. -/
+  add : Array Id := #[]
+  -- TODO: Support "values" in `World.entityInit`
+  /-- String expression with components to add -/
+  addExpr : Option String := none
 
 /-- Type with information about the current Flecs build. -/
 define_foreign_type BuildInfo

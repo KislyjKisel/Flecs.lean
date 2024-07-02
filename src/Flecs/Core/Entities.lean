@@ -43,6 +43,9 @@ When 0 is passed to the id parameter, no component is added to the new entity.
 @[extern "lean_flecs_newWithId"]
 opaque World.newWithId (world : @& World α) (id : Id) : BaseIO Entity
 
+@[extern "lean_flecs_World_entityInit"]
+opaque World.entityInit (world : @& World α) (desc : @& EntityDesc) : BaseIO Entity
+
 /--
 This operation clones the components of one entity into another entity.
 
@@ -76,7 +79,7 @@ The id may be a wildcard and/or a pair.
 @[extern "lean_flecs_deleteWith"]
 opaque World.deleteWith (world : @& World α) (id : Id) : BaseIO Unit
 
--- TODO: ecs_new_w_table ecs_entity_init ecs_delete_with ecs_bulk_new_w_id ecs_bulk_init
+-- TODO: ecs_new_w_table ecs_delete_with ecs_bulk_new_w_id ecs_bulk_init
 
 
 /-! # Adding & Removing -/
