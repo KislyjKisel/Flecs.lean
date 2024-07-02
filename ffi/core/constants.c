@@ -231,10 +231,6 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_onSet(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsOnSet);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_unSet(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsUnSet);
-}
-
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_monitor(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsMonitor);
 }

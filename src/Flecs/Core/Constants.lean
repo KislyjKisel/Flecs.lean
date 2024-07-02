@@ -213,9 +213,6 @@ define_foreign_constant onRemove : Entity := "lean_flecs_c_onRemove"
 /-- Event that triggers when a component is set for an entity. -/
 define_foreign_constant onSet : Entity := "lean_flecs_c_onSet"
 
-/-- Event that triggers when a component is unset for an entity. -/
-define_foreign_constant unSet : Entity := "lean_flecs_c_unSet"
-
 /-- Event that triggers observer when an entity starts/stops matching a query. -/
 define_foreign_constant monitor : Entity := "lean_flecs_c_monitor"
 
