@@ -9,7 +9,7 @@ def optionCompilerBindings := (get_config? bindings_cc).getD "cc"
 def optionFlagsCompileFlecs := splitArgStr $ (get_config? flecs_cflags).getD ""
 def optionFlagsCompileBindings := splitArgStr $ (get_config? bindings_cflags).getD ""
 
-require pod from git "https://github.com/KislyjKisel/lean-pod" @ "95ffd84"
+require pod from git "https://github.com/KislyjKisel/lean-pod" @ "c2a774a"
 
 package flecs where
   srcDir := "src"

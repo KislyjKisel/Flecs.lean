@@ -11,7 +11,7 @@ namespace Flecs
 
 open scoped Pod
 
-variable {α : Type}
+variable {α β : Type}
 
 @[extern "lean_flecs_initialize_types"] private
 opaque initializeTypes : BaseIO Unit
@@ -61,8 +61,8 @@ structure TableRange where
   count : Int32
 deriving Nonempty
 
-/-- A query. -/
-define_foreign_type Query
+/-- A query. `α` - group context type. -/
+define_foreign_type Query (α : Type)
 
 -- Unused
 -- /-- An observer is a system that is invoked when an event matches its query. -/
@@ -108,14 +108,17 @@ This is the current list of types in the flecs API that can be used as an `Poly`
 
 Functions that accept an `Poly` argument can accept objects of these types.
 If the object does not have the requested mixin the API will throw an assert.
+
+`α` - world context type.
+`β` - query group context type.
 -/
-define_foreign_type Poly (α : Type)
+define_foreign_type Poly (α β : Type)
 
 private unsafe
-def Poly.ofWorldImpl (world : World α) : Poly α := unsafeCast world
+def Poly.ofWorldImpl (world : World α) : Poly α β := unsafeCast world
 
 @[implemented_by ofWorldImpl]
-opaque Poly.ofWorld (world : World α) : Poly α
+opaque Poly.ofWorld (world : World α) : Poly α β
 
 -- private unsafe
 -- def Poly.ofStageImpl (Stage : Stage) : Poly := unsafeCast Stage
@@ -124,9 +127,10 @@ opaque Poly.ofWorld (world : World α) : Poly α
 -- opaque Poly.ofStage (Stage : Stage) : Poly
 
 private unsafe
-def Poly.ofQueryImpl (Query : Query) : Poly α := unsafeCast Query
+def Poly.ofQueryImpl (query : Query β) : Poly α β := unsafeCast query
+
 @[implemented_by ofQueryImpl]
-opaque Poly.ofQuery (Query : Query) : Poly α
+opaque Poly.ofQuery (query : Query β) : Poly α β
 
 -- Unused
 -- /-- Type that stores poly mixins. -/
@@ -151,8 +155,12 @@ def GroupByAction (α) := World α → Table → (groupId : Id) → BaseIO UInt6
 /-- Callback invoked when a query creates a new group. -/
 def GroupCreateAction (α β : Type) := World α → (groupId : UInt64) → BaseIO β
 
+def GroupCreateAction.unit : GroupCreateAction α Unit := λ _ _ ↦ pure ()
+
 /-- Callback invoked when a query deletes an existing group. -/
 def GroupDeleteAction (α β : Type) := World α → (groupId : UInt64) → β → BaseIO Unit
+
+def GroupDeleteAction.unit : GroupDeleteAction α Unit := λ _ _ _ ↦ pure ()
 
 -- /-- Function type for runnables (systems, observers). -/
 -- def RunAction := Iter → BaseIO Unit
@@ -376,17 +384,20 @@ inductive OrderBy where
 | boxed (entity : Entity) (α : Type) (callback : OrderByAction α)
 | unboxed (entity : Entity) (α : Type) (callback : OrderByAction α) [Storable α] [ReadBytes α]
 
-inductive GroupBy (α : Type) where
-| none
-| simple (component : Id) (callback : GroupByAction α)
-| detailed (component : Id) (callback : GroupByAction α) (β : Type) (onCreate : GroupCreateAction α β) (onDelete : GroupDeleteAction α β)
+/-- `α` - world context. `β` - group context. -/
+structure GroupBy (α β : Type) where
+  component : Id
+  callback : Option (GroupByAction α) := none
+  onCreate : GroupCreateAction α β
+  onDelete : GroupDeleteAction α β
 
 /--
 Used with `Query.init`.
 
 `α` - world context type.
+`β` - group context type.
 -/
-structure QueryDesc (α : Type) where
+structure QueryDesc (α β : Type) where
   /-- Query terms -/
   terms : Array Term := #[]
   terms_size_lt : terms.size < termCountMax := by decide
@@ -397,7 +408,7 @@ structure QueryDesc (α : Type) where
   /-- Flags for enabling query features. -/
   flags : QueryFlags := 0
   orderBy : OrderBy := .none
-  groupBy : GroupBy α := .none
+  groupBy : Option (GroupBy α β) := .none
   /-- Entity associated with query (optional). -/
   entity : Entity := 0
 
@@ -571,7 +582,7 @@ opaque WorldInfo.tableCount (wi : @& WorldInfo) : BaseIO Int32
 opaque WorldInfo.emptyTableCount (wi : @& WorldInfo) : BaseIO Int32
 
 
-/-- Type that contains information about a query group. -/
+/-- Type that contains information about a query group. `α` - group context type. -/
 define_foreign_type QueryGroupInfo (α : Type)
 
 /-- How often tables have been matched/unmatched. -/

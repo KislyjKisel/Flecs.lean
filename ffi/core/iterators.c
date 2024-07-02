@@ -3,6 +3,23 @@
 #include <flecs.h>
 #include <flecs.lean/types.h>
 
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_flags(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->flags));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_setFlags(lean_flecs_Iter it, uint32_t flags, lean_obj_arg io_) {
+    lean_flecs_Iter_fromRepr(it)->flags = flags;
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_count(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->count));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_instanceCount(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->instance_count));
+}
+
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_next(lean_flecs_Iter it, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box(
         ecs_iter_next(lean_flecs_Iter_fromRepr(it))
@@ -14,7 +31,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_fini(lean_flecs_Iter it, lean_obj_arg i
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_Iter_count(lean_flecs_Iter it, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_count_f(lean_flecs_Iter it, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box_uint32(
         ecs_iter_count(lean_flecs_Iter_fromRepr(it))
     ));
@@ -43,10 +60,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_setVarAsTable(lean_flecs_Iter it, uint3
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_setVarAsRange(lean_flecs_Iter it, uint32_t varId, b_lean_obj_arg range, lean_obj_arg io_) {
-    ecs_table_range_t range_c;
-    range_c.table = lean_flecs_Table_unbox(LEAN_POD_CTOR_GET(range, LEAN_FLECS_TableRange_table));
-    range_c.offset = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(range, LEAN_FLECS_TableRange_offset));
-    range_c.count = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(range, LEAN_FLECS_TableRange_count));
+    ecs_table_range_t range_c = lean_flecs_TableRange_fromRepr(range);
     ecs_iter_set_var_as_range(lean_flecs_Iter_fromRepr(it), (int32_t)varId, &range_c);
     return lean_io_result_mk_ok(lean_box(0));
 }
@@ -81,26 +95,70 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_changed(lean_flecs_Iter it, lean_obj_ar
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_str(lean_flecs_Iter it, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_mk_string(
-        ecs_iter_str(lean_flecs_Iter_fromRepr(it))
-    ));
+    char* expr_c = ecs_iter_str(lean_flecs_Iter_fromRepr(it));
+    lean_object* expr = lean_mk_string(expr_c);
+    ecs_os_free(expr_c);
+    return lean_io_result_mk_ok(expr);
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_Iter_fieldWithSize(lean_flecs_Iter it, b_lean_obj_arg storable, uint32_t index, lean_obj_arg io_) {
-    size_t size = lean_usize_of_nat(lean_pod_Storable_byteSize(storable));
-    return lean_io_result_mk_ok(lean_pod_BytesRef_box(
-        ecs_field_w_size(lean_flecs_Iter_fromRepr(it), size, (int32_t)index)
-    ));
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_fieldUnboxed(lean_flecs_Iter it, b_lean_obj_arg storable, b_lean_obj_arg readBytes, uint32_t fieldIndex, uint32_t entityIndex, lean_obj_arg io_) {
+    ecs_iter_t* it_c = lean_flecs_Iter_fromRepr(it);
+    if (LEAN_UNLIKELY(entityIndex >= it_c->count)) {
+        return lean_mk_io_user_error(lean_mk_string("entityIndex >= it.count"));
+    }
+    size_t component_size = lean_usize_of_nat(lean_pod_Storable_byteSize(storable));
+    lean_object* readBytesRefOffEl = LEAN_POD_CTOR_GET(readBytes, LEAN_POD_ReadBytes_readBytesRefOffEl);
+    lean_inc_ref(readBytesRefOffEl);
+    lean_object* res_box = lean_apply_6(
+        readBytesRefOffEl,
+        lean_box(0),
+        lean_usize_to_nat(it_c->count * component_size),
+        lean_pod_BytesRef_box(ecs_field_w_size(it_c, component_size, (int32_t)fieldIndex)),
+        lean_uint32_to_nat(entityIndex),
+        lean_box(0),
+        lean_box(0)
+    );
+    lean_object* res = lean_ctor_get(res_box, 0);
+    lean_inc(res);
+    lean_dec_ref(res_box);
+    return lean_io_result_mk_ok(res);
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_Iter_field(lean_flecs_Iter it, uint32_t index, lean_obj_arg io_) {
-    lean_object* value = *ecs_field(lean_flecs_Iter_fromRepr(it), lean_object*, (int32_t)index);
-    lean_inc(value);
-    return lean_io_result_mk_ok(value);
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_setFieldUnboxed(lean_flecs_Iter it, b_lean_obj_arg storable, b_lean_obj_arg writeBytes, uint32_t fieldIndex, uint32_t entityIndex, lean_obj_arg value, lean_obj_arg io_) {
+    ecs_iter_t* it_c = lean_flecs_Iter_fromRepr(it);
+    if (LEAN_LIKELY(entityIndex < it_c->count)) {
+        size_t component_size = lean_usize_of_nat(lean_pod_Storable_byteSize(storable));
+        lean_object* writeBytesRefOffEl = LEAN_POD_CTOR_GET(writeBytes, LEAN_POD_WriteBytes_writeBytesRefOffEl);
+        lean_inc_ref(writeBytesRefOffEl);
+        lean_dec_ref(lean_apply_7(
+            writeBytesRefOffEl,
+            lean_box(0),
+            lean_usize_to_nat(it_c->count * component_size),
+            lean_pod_BytesRef_box(ecs_field_w_size(it_c, component_size, (int32_t)fieldIndex)),
+            lean_uint32_to_nat(entityIndex),
+            value,
+            lean_box(0),
+            lean_box(0)
+        ));
+    }
+    return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_Iter_setField(lean_flecs_Iter it, uint32_t index, lean_obj_arg value, lean_obj_arg io_) {
-    *ecs_field(lean_flecs_Iter_fromRepr(it), lean_object*, (int32_t)index) = value;
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_field(lean_flecs_Iter it, uint32_t fieldIndex, uint32_t entityIndex, lean_obj_arg io_) {
+    ecs_iter_t* it_c = lean_flecs_Iter_fromRepr(it);
+    if (LEAN_UNLIKELY(entityIndex >= it_c->count)) {
+        return lean_mk_io_user_error(lean_mk_string("entityIndex >= it.count"));
+    }
+    lean_object** values = ecs_field(it_c, lean_object*, (int32_t)fieldIndex);
+    lean_inc(values[entityIndex]);
+    return lean_io_result_mk_ok(values[entityIndex]);
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_setField(lean_flecs_Iter it, uint32_t fieldIndex, uint32_t entityIndex, lean_obj_arg value, lean_obj_arg io_) {
+    ecs_iter_t* it_c = lean_flecs_Iter_fromRepr(it);
+    if (LEAN_LIKELY(entityIndex < it_c->count)) {
+        ecs_field(lean_flecs_Iter_fromRepr(it), lean_object*, (int32_t)fieldIndex)[entityIndex] = value;
+    }
     return lean_io_result_mk_ok(lean_box(0));
 }
 

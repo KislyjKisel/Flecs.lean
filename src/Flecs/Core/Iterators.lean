@@ -3,11 +3,87 @@ import Pod.Storable
 import Pod.BytesRef
 import Flecs.Core.Types
 
-open Pod (Int32 Storable BytesRefMut)
+open Pod (Int32 Storable ReadBytes WriteBytes)
 
 namespace Flecs
 
 variable {α}
+
+structure IterFlags where
+  val : UInt32
+deriving Repr, Inhabited
+
+instance : OfNat IterFlags 0 := ⟨⟨0⟩⟩
+instance : OrOp IterFlags where
+  or a b := .mk (a.val ||| b.val)
+
+/-- Does iterator contain valid result -/
+def IterFlags.isValid := IterFlags.mk ((1 : UInt32) <<< 0)
+
+/-- Does iterator provide (component) data -/
+def IterFlags.noData := IterFlags.mk ((1 : UInt32) <<< 1)
+
+/-- Is iterator instanced -/
+def IterFlags.isInstanced := IterFlags.mk ((1 : UInt32) <<< 2)
+
+/-- Iterator has no results -/
+def IterFlags.noResults := IterFlags.mk ((1 : UInt32) <<< 3)
+
+/-- Only evaluate non-this terms -/
+def IterFlags.ignoreThis := IterFlags.mk ((1 : UInt32) <<< 4)
+
+/-- Does iterator have conditionally set fields -/
+def IterFlags.hasCondSet := IterFlags.mk ((1 : UInt32) <<< 6)
+
+/-- Profile iterator performance -/
+def IterFlags.profile := IterFlags.mk ((1 : UInt32) <<< 7)
+
+/-- Trivial iterator mode -/
+def IterFlags.trivialSearch := IterFlags.mk ((1 : UInt32) <<< 8)
+
+/-- Trivial iterator w/no data -/
+def IterFlags.trivialSearchNoData := IterFlags.mk ((1 : UInt32) <<< 9)
+
+/-- Trivial test mode (constrained `$this`) -/
+def IterFlags.trivialTest := IterFlags.mk ((1 : UInt32) <<< 10)
+
+/-- Trivial test w/wildcards -/
+def IterFlags.trivialTestWildcard := IterFlags.mk ((1 : UInt32) <<< 11)
+
+/-- Trivial search with wildcard ids -/
+def IterFlags.trivialSearchWildcard := IterFlags.mk ((1 : UInt32) <<< 12)
+
+/-- Cache search -/
+def IterFlags.cacheSearch := IterFlags.mk ((1 : UInt32) <<< 13)
+
+/-- Change detection for fixed in terms is done -/
+def IterFlags.fixedInChangeComputed := IterFlags.mk ((1 : UInt32) <<< 14)
+
+/-- Fixed in terms changed -/
+def IterFlags.fixedInChanged := IterFlags.mk ((1 : UInt32) <<< 15)
+
+/-- Result was skipped for change detection -/
+def IterFlags.skip := IterFlags.mk ((1 : UInt32) <<< 16)
+
+/-- Uses C++ `each` iterator -/
+def IterFlags.cppEach := IterFlags.mk ((1 : UInt32) <<< 17)
+
+/-- Result only populates table -/
+def IterFlags.tableOnly := IterFlags.mk ((1 : UInt32) <<< 18)
+
+@[extern "lean_flecs_Iter_flags"]
+opaque Iter.flags (it : @& Iter) : BaseIO IterFlags
+
+@[extern "lean_flecs_Iter_setFlags"]
+opaque Iter.setFlags (it : @& Iter) (flags : IterFlags) : BaseIO Unit
+
+/-- Number of entities to iterate (getter) -/
+@[extern "lean_flecs_Iter_count"]
+opaque Iter.count (it : @& Iter) : BaseIO UInt32
+
+/-- Number of entities to iterate before next table -/
+@[extern "lean_flecs_Iter_instanceCount"]
+opaque Iter.instanceCount (it : @& Iter) : BaseIO UInt32
 
 /--
 Progress any iterator.
@@ -16,10 +92,10 @@ This operation is useful in combination with iterators for which it is not known
 Example use cases are functions that should accept any kind of iterator (such as serializers)
 or iterators created from poly objects.
 
-This operation is slightly slower than using a type-specific iterator (e.g. `Iter.filterNext`,
-`Iter.queryNext`) as it has to call a function pointer which introduces a level of indirection.
+This operation is slightly slower than using a type-specific iterator (e.g. `Iter.queryNext`)
+as it has to call a function pointer which introduces a level of indirection.
 
-Returns true if iterator has more results, false if not.
+Returns `true` if iterator has more results, `false` if not.
 -/
 @[extern "lean_flecs_Iter_next"]
 opaque Iter.next (it : @& Iter) : BaseIO Bool
@@ -44,8 +120,8 @@ If a query contains no matched entities but still yields results
 To determine the number of matched entities,
 the operation iterates the iterator until it yields no more results.
 -/
-@[extern "lean_flecs_Iter_count"]
-opaque Iter.count (it : @& Iter) : BaseIO Int32
+@[extern "lean_flecs_Iter_count_f"]
+opaque Iter.count' (it : @& Iter) : BaseIO Int32
 
 /--
 Test if iterator is true.
@@ -168,22 +244,17 @@ opaque Iter.str (it : @& Iter) : BaseIO String
 -- ecs_page_iter ecs_page_next
 -- ecs_worker_iter ecs_worker_next
 
-/--
-This operation retrieves a pointer to an array of data that belongs to the term in the query.
-The index refers to the location of the term in the query, and starts counting from one.
+@[extern "lean_flecs_Iter_fieldUnboxed"]
+opaque Iter.fieldUnboxed (it : @& Iter) (α : Type) [@& Storable α] [@& ReadBytes α] (fieldIndex : Int32) (entityIndex : UInt32) : IO α
 
-[docs](https://www.flecs.dev/flecs/group__iterator.html#ga2ac48f96b44d1ed4e69bc28d96029b7a)
--/
-@[extern "lean_flecs_Iter_fieldWithSize"]
-opaque Iter.fieldWithSize (it : @& Iter) (α : Type) [S : @& Storable α] (index : Int32) : BaseIO (BytesRefMut IO.RealWorld S.byteSize S.alignment)
+@[extern "lean_flecs_Iter_setFieldUnboxed"]
+opaque Iter.setFieldUnboxed (it : @& Iter) [@& Storable α] [@& WriteBytes α] (fieldIndex : Int32) (entityIndex : UInt32) (value : α) : BaseIO Unit
 
-/-- `Iter.fieldWithSize` alternative for boxed components. -/
 @[extern "lean_flecs_Iter_field"]
-opaque Iter.field (it : @& Iter) (α : Type) [Nonempty α] (index : Int32) : BaseIO α
+opaque Iter.field (it : @& Iter) (α : Type) (fieldIndex : Int32) (entityIndex : UInt32) : IO α
 
-/-- `Iter.fieldWithSize` alternative for boxed components. -/
 @[extern "lean_flecs_Iter_setField"]
-opaque Iter.setField (it : @& Iter) (index : Int32) (value : α) : BaseIO Unit
+opaque Iter.setField (it : @& Iter) (fieldIndex : Int32) (entityIndex : UInt32) (value : α) : BaseIO Unit
 
 /-- Test whether the field is readonly. -/
 @[extern "lean_flecs_Iter_fieldIsReadonly"]

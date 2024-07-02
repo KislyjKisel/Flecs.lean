@@ -6,7 +6,7 @@ open Pod (Int32)
 
 namespace Flecs
 
-variable {α : Type}
+variable {α β : Type}
 
 /-! # Creation and deletion -/
 
@@ -130,7 +130,7 @@ opaque World.shouldQuit (world : @& World α) : BaseIO Bool
 /--
 Begin readonly mode.
 
-[docs](https://www.flecs.dev/flecs/group__commands.html#ga409ffe8d65b84e8b629e7c373ba6fffb)
+[...]
 -/
 @[extern "lean_flecs_readonlyBegin"]
 opaque World.readonlyBegin (world : @& World α) (mutliThreaded : Bool) : BaseIO Bool
@@ -341,14 +341,14 @@ opaque World.deleteEmptyTables
 
 /-- Get entity from poly. -/
 @[extern "lean_flecs_getEntity"]
-opaque Poly.getEntity (poly : @& Poly α) : BaseIO Entity
+opaque Poly.getEntity (poly : @& Poly α β) : BaseIO Entity
 
 /-- Make a pair id. -/
 @[extern "lean_flecs_makePair"]
 opaque makePair (first second : Entity) : Id
 
 @[extern "lean_flecs_Poly_asWorld"]
-opaque Poly.asWorld (poly : @& Poly α) : BaseIO (Option (World α))
+opaque Poly.asWorld (poly : @& Poly α β) : BaseIO (Option (World α))
 
 @[extern "lean_flecs_Poly_asQuery"]
-opaque Poly.asQuery (poly : @& Poly α) : BaseIO (Option Query)
+opaque Poly.asQuery (poly : @& Poly α β) : BaseIO (Option (Query β))
