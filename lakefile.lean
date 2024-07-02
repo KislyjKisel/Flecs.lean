@@ -24,21 +24,22 @@ lean_exe «flecs-test» where
 
 section Flecs
 
+def flecsFlags := #[
+  "-DFLECS_CUSTOM_BUILD",
+  "-DFLECS_OS_API_IMPL",
+  "-DFLECS_MODULE",
+  "-DFLECS_STATS",
+  "-DFLECS_SYSTEM",
+  "-DFLECS_PIPELINE",
+  "-DFLECS_TIMER",
+  "-DFLECS_APP"
+]
+
 target flecs.o pkg : FilePath := do
   let oFile := pkg.buildDir / "c" / "flecs.o"
   let srcJob ← inputTextFile <| pkg.dir / "flecs" / "flecs.c"
   buildO oFile srcJob #[]
-    (optionFlagsCompileFlecs.append #[
-      "-fPIC",
-      "-DFLECS_CUSTOM_BUILD",
-      "-DFLECS_OS_API_IMPL",
-      "-DFLECS_MODULE",
-      "-DFLECS_STATS",
-      "-DFLECS_SYSTEM",
-      "-DFLECS_PIPELINE",
-      "-DFLECS_TIMER",
-      "-DFLECS_APP"
-    ])
+    (optionFlagsCompileFlecs.push "-fPIC" |>.append flecsFlags)
     optionCompilerFlecs
 
 -- extern_lib «flecs» pkg := do
@@ -81,7 +82,7 @@ def bindingsCFlags (pkg : NPackage _package.name) : FetchM (Array String × Arra
     "-fPIC",
     "-I", (pkg.dir / "flecs").toString,
     "-I", (pkg.dir / "ffi" / "include").toString
-  ]
+  ] |>.append flecsFlags
 
   match pkg.deps.find? λ dep ↦ dep.name == `pod with
     | none => error "Missing dependency 'Pod'"
