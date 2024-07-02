@@ -28,7 +28,17 @@ target flecs.o pkg : FilePath := do
   let oFile := pkg.buildDir / "c" / "flecs.o"
   let srcJob ← inputTextFile <| pkg.dir / "flecs" / "flecs.c"
   buildO oFile srcJob #[]
-    (#["-fPIC", "-DFLECS_CUSTOM_BUILD"].append optionFlagsCompileFlecs)
+    (optionFlagsCompileFlecs.append #[
+      "-fPIC",
+      "-DFLECS_CUSTOM_BUILD",
+      "-DFLECS_OS_API_IMPL",
+      "-DFLECS_MODULE",
+      "-DFLECS_STATS",
+      "-DFLECS_SYSTEM",
+      "-DFLECS_PIPELINE",
+      "-DFLECS_TIMER",
+      "-DFLECS_APP"
+    ])
     optionCompilerFlecs
 
 -- extern_lib «flecs» pkg := do
@@ -51,7 +61,13 @@ def bindingsSources := #[
   "core/observers",
   "core/iterators",
   "core/tables",
-  "core/values"
+  "core/values",
+  "addons/module",
+  "addons/stats",
+  "addons/system",
+  "addons/pipeline",
+  "addons/timer",
+  "addons/app"
 ]
 
 def bindingsExtras : Array String := #[
