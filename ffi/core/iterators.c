@@ -3,6 +3,58 @@
 #include <flecs.h>
 #include <flecs.lean/types.h>
 
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_world(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_World_box(lean_flecs_Iter_fromRepr(it)->world));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_realWorld(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_World_box(lean_flecs_Iter_fromRepr(it)->real_world));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_system(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_Entity_box(lean_flecs_Iter_fromRepr(it)->system));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_event(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_Entity_box(lean_flecs_Iter_fromRepr(it)->event));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_eventId(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_Id_box(lean_flecs_Iter_fromRepr(it)->event_id));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_eventCur(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->event_cur));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_variableCount(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->variable_count));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_deltaTime(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_FTime_box(lean_flecs_Iter_fromRepr(it)->delta_time));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_deltaSystemTime(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_FTime_box(lean_flecs_Iter_fromRepr(it)->delta_system_time));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_frameOffset(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->frame_offset));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_offset(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->offset));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_count(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->count));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_instanceCount(lean_flecs_Iter it, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->instance_count));
+}
+
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_flags(lean_flecs_Iter it, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->flags));
 }
@@ -12,12 +64,9 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_setFlags(lean_flecs_Iter it, uint32_t f
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_Iter_count(lean_flecs_Iter it, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->count));
-}
-
-LEAN_EXPORT lean_obj_res lean_flecs_Iter_instanceCount(lean_flecs_Iter it, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->instance_count));
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_setInterruptedBy(lean_flecs_Iter it, lean_flecs_Entity entity, lean_obj_arg io_) {
+    lean_flecs_Iter_fromRepr(it)->interrupted_by = lean_flecs_Entity_fromRepr(entity);
+    return lean_io_result_mk_ok(lean_box(0));
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_next(lean_flecs_Iter it, lean_obj_arg io_) {

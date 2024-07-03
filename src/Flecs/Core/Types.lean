@@ -72,7 +72,16 @@ define_foreign_type Query (α : Type)
 -- /-- An observable produces events that can be listened for by an observer. -/
 -- define_foreign_type Observable
 
-define_foreign_type Iter
+/--
+Iterator.
+
+Used for iterating queries.
+
+[...]
+
+`α` - world context type.
+-/
+define_foreign_type Iter (α : Type)
 
 -- Unused
 -- /-- A ref is a fast way to fetch a component for a specific entity. -/

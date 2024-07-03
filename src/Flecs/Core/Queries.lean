@@ -81,25 +81,25 @@ iterator resources need to be cleaned up explicitly.
 [...]
 -/
 @[extern "lean_flecs_Query_iter"]
-opaque Query.iter (world : @& World α) (query : @& Query β) : BaseIO Iter
+opaque Query.iter (world : @& World α) (query : @& Query β) : BaseIO (Iter α)
 
 /-- Progress query iterator. Returns `true` if the iterator has more results, `false` if not. -/
 @[extern "lean_flecs_Iter_queryNext"]
-opaque Iter.queryNext (world : @& Iter) : BaseIO Bool
+opaque Iter.queryNext (world : @& Iter α) : BaseIO Bool
 
 /--
 Match entity with query.
 This operation matches an entity with a query and returns the result of the match.
 -/
 @[extern "lean_flecs_Query_has"]
-opaque Query.has (query : @& Query β) (entity : Entity) : BaseIO (Option Iter)
+opaque Query.has (query : @& Query β) (entity : Entity) : BaseIO (Option (Iter α))
 
 /--
 Match table with query.
 This operation matches a table with a query and returns the result of the match.
 -/
 @[extern "lean_flecs_Query_hasTable"]
-opaque Query.hasTable (query : @& Query β) (table : @& Table) : BaseIO (Option Iter)
+opaque Query.hasTable (query : @& Query β) (table : @& Table) : BaseIO (Option (Iter α))
 
 /--
 Match range with query.
@@ -108,7 +108,7 @@ This operation matches a range with a query and returns the result of the match.
 The entire range must match the query for the operation to return `some`.
 -/
 @[extern "lean_flecs_Query_hasRange"]
-opaque Query.hasRange (query : @& Query β) (range : @& TableRange) : BaseIO (Option Iter)
+opaque Query.hasRange (query : @& Query β) (range : @& TableRange) : BaseIO (Option (Iter α))
 
 /--
 Returns how often a match event happened for a cached query.
@@ -132,7 +132,7 @@ it.setFlags ((← it.flags) ||| IterFlags.profile)
 ```
 -/
 @[extern "lean_flecs_Query_planWithProfile"]
-opaque Query.planWithProfile (query : @& Query β) (it : @& Iter) : BaseIO String
+opaque Query.planWithProfile (query : @& Query β) (it : @& Iter α) : BaseIO String
 
 -- TODO: Query.argsParse
 -- /--
@@ -147,7 +147,7 @@ opaque Query.planWithProfile (query : @& Query β) (it : @& Iter) : BaseIO Strin
 -- Returns offset from the start of `expr` of the next character after the last parsed one.
 -- -/
 -- @[extern "lean_flecs_Query_argsParse"]
--- opaque Query.argsParse (query : @& Query β) (it : @& Iter) (expr : @& String) : BaseIO Nat
+-- opaque Query.argsParse (query : @& Query β) (it : @& Iter α) (expr : @& String) : BaseIO Nat
 
 /--
 Returns whether the query data changed since the last iteration.
@@ -172,7 +172,7 @@ Only valid iterators must be provided (next has to be called at least once & ret
 and the iterator must be a query iterator.
 -/
 @[extern "lean_flecs_Iter_skip"]
-opaque Iter.skip (it : @& Iter) : BaseIO Unit
+opaque Iter.skip (it : @& Iter α) : BaseIO Unit
 
 /--
 Set group to iterate for query iterator.
@@ -182,7 +182,7 @@ group id. The query must have a group_by function, and the iterator must be a qu
 [...]
 -/
 @[extern "lean_flecs_Iter_setGroup"]
-opaque Iter.setGroup (it : @& Iter) (groupId : UInt64) : BaseIO Unit
+opaque Iter.setGroup (it : @& Iter α) (groupId : UInt64) : BaseIO Unit
 
 /--
 Get context of query group.
