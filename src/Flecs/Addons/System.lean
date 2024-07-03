@@ -4,7 +4,7 @@ import Pod.Instances
 import Flecs.Core.Types
 import Flecs.Core.Constants
 
-open Pod (Int32 Int64 Storable ReadBytes WriteBytes)
+open Pod (Int32 Int64 Storable)
 
 namespace Flecs
 
