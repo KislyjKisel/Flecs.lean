@@ -1,14 +1,34 @@
 import Pod.Meta
 import Pod.Int
+import Pod.Instances
 import Flecs.Core.Types
+import Flecs.Core.Constants
 
-open Pod (Int32 Int64)
+open Pod (Int32 Int64 Storable ReadBytes WriteBytes)
 
 namespace Flecs
 
 open scoped Pod
 
 variable {α β : Type}
+
+/-- Component used to provide a tick source to systems -/
+structure TickSource where
+  /-- `true` if providing tick -/
+  tick : Bool
+  /-- Time elapsed since last tick -/
+  timeElapsed : FTime
+deriving Repr, Inhabited
+
+@[inherit_doc Entity.tickSource]
+abbrev TickSource.id : Entity := Entity.tickSource
+
+instance : Storable TickSource where
+  byteSize := 8
+  alignment := 4
+  alignment_dvd_byteSize := by exists 2
+
+#pod_c_rwbytes_instance Flecs.TickSource
 
 /-- Use with `World.systemInit` to create or update a system. -/
 structure SystemDesc (worldCtx groupCtx : Type) where

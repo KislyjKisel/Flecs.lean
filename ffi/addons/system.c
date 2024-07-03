@@ -1,7 +1,28 @@
+#include <assert.h>
 #include <lean/lean.h>
 #include <flecs.h>
 #include <flecs.lean/types.h>
 #include "../util.h"
+
+#ifdef static_assert
+static_assert(sizeof(EcsTickSource) == 8 && ECS_ALIGNOF(EcsTickSource) == 4); // Storable TickSource
+#endif
+
+static inline lean_obj_res lean_flecs_TickSource_box(EcsTickSource tickSource) {
+    lean_object* obj = lean_alloc_ctor(0, 1, 1);
+    lean_ctor_set_uint8(obj, sizeof(lean_object*), tickSource.tick);
+    lean_ctor_set(obj, 0, lean_flecs_FTime_box(tickSource.time_elapsed));
+    return obj;
+}
+
+static inline EcsTickSource lean_flecs_TickSource_fromRepr(b_lean_obj_arg obj) {
+    return (EcsTickSource){
+        .tick = lean_ctor_get_uint8(obj, sizeof(lean_object*)),
+        .time_elapsed = lean_flecs_FTime_unbox(lean_ctor_get(obj, 0)),
+    };
+}
+
+LEAN_POD_RWBYTES_INST(Flecs_TickSource, EcsTickSource, lean_object*, lean_flecs_TickSource_box, lean_flecs_TickSource_box, lean_flecs_TickSource_fromRepr) 
 
 #define LEAN_FLECS_SystemDesc_LAYOUT 0, 4, 0, 2, 0, 0, 2
 #define LEAN_FLECS_SystemDesc_entity U64, 0, LEAN_FLECS_SystemDesc_LAYOUT
