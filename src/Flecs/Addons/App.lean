@@ -8,16 +8,16 @@ namespace Flecs
 variable {α : Type}
 
 /-- Callback type for init action -/
-def AppInitAction (α) := World α → BaseIO Unit
+def AppInitAction (worldCtx) := World worldCtx → BaseIO Unit
 
 /-- Callback type for run action -/
-def AppRunAction (α) := World α → BaseIO Int32
+def AppRunAction (worldCtx) := World worldCtx → BaseIO Int32
 
 /-- Callback type for frame action -/
-def AppFrameAction (α) := World α → BaseIO Int32
+def AppFrameAction (worldCtx) := World worldCtx → BaseIO Int32
 
 /-- Used with `World.appRunFrame` -/
-structure AppDesc (α : Type) where
+structure AppDesc where
   /-- Target FPS -/
   targetFps : FTime := 0
   /-- Frame time increment (0 for measured values) -/
@@ -34,13 +34,13 @@ structure AppDesc (α : Type) where
   port : UInt16 := 0
 
 /-- Used with `World.appRun` -/
-structure AppDesc' (α : Type) extends AppDesc α where
+structure AppDesc' (worldCtx : Type) extends AppDesc where
   /-- If `some`, function is ran before the run action -/
-  init : Option (AppInitAction α) := none
+  init : Option (AppInitAction worldCtx) := none
   /-- If `none`, `frame` or default frame action gets called until returns non-zero result. -/
-  run : Option (AppRunAction α) := none
+  run : Option (AppRunAction worldCtx) := none
   /-- If `run` is none, gets called by default run action every frame. Non-zero result stops execution. -/
-  frame : Option (AppFrameAction α) := none
+  frame : Option (AppFrameAction worldCtx) := none
 
 /--
 Run application.
@@ -61,4 +61,4 @@ By default this operation will invoke `progress` directly, unless a custom frame
 Returns value returned by `progress`.
 -/
 @[extern "lean_flecs_World_appRunFrame"]
-opaque World.appRunFrame (world : @& World α) (desc : @& AppDesc α) : BaseIO Int32
+opaque World.appRunFrame (world : @& World α) (desc : @& AppDesc) : BaseIO Int32

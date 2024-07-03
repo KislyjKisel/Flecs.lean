@@ -61,8 +61,8 @@ structure TableRange where
   count : Int32
 deriving Nonempty
 
-/-- A query. `α` - group context type. -/
-define_foreign_type Query (α : Type)
+/-- A query. -/
+define_foreign_type Query (groupCtx : Type)
 
 -- Unused
 -- /-- An observer is a system that is invoked when an event matches its query. -/
@@ -78,10 +78,8 @@ Iterator.
 Used for iterating queries.
 
 [...]
-
-`α` - world context type.
 -/
-define_foreign_type Iter (α : Type)
+define_foreign_type Iter (worldCtx : Type)
 
 -- Unused
 -- /-- A ref is a fast way to fetch a component for a specific entity. -/
@@ -121,7 +119,7 @@ If the object does not have the requested mixin the API will throw an assert.
 `α` - world context type.
 `β` - query group context type.
 -/
-define_foreign_type Poly (α β : Type)
+define_foreign_type Poly (worldCtx groupCtx : Type)
 
 private unsafe
 def Poly.ofWorldImpl (world : World α) : Poly α β := unsafeCast world
@@ -162,12 +160,12 @@ def OrderByAction (α : Type) := Entity → α → Entity → α → BaseIO Int3
 def GroupByAction (α) := World α → Table → (groupId : Id) → BaseIO UInt64
 
 /-- Callback invoked when a query creates a new group. -/
-def GroupCreateAction (α β : Type) := World α → (groupId : UInt64) → BaseIO β
+def GroupCreateAction (worldCtx groupCtx : Type) := World worldCtx → (groupId : UInt64) → BaseIO groupCtx
 
 def GroupCreateAction.unit : GroupCreateAction α Unit := λ _ _ ↦ pure ()
 
 /-- Callback invoked when a query deletes an existing group. -/
-def GroupDeleteAction (α β : Type) := World α → (groupId : UInt64) → β → BaseIO Unit
+def GroupDeleteAction (worldCtx groupCtx : Type) := World worldCtx → (groupId : UInt64) → groupCtx → BaseIO Unit
 
 def GroupDeleteAction.unit : GroupDeleteAction α Unit := λ _ _ _ ↦ pure ()
 
@@ -393,20 +391,14 @@ inductive OrderBy where
 | boxed (entity : Entity) (α : Type) (callback : OrderByAction α)
 | unboxed (entity : Entity) (α : Type) (callback : OrderByAction α) [Storable α] [ReadBytes α]
 
-/-- `α` - world context. `β` - group context. -/
-structure GroupBy (α β : Type) where
+structure GroupBy (worldCtx groupCtx : Type) where
   component : Id
-  callback : Option (GroupByAction α) := none
-  onCreate : GroupCreateAction α β
-  onDelete : GroupDeleteAction α β
+  callback : Option (GroupByAction worldCtx) := none
+  onCreate : GroupCreateAction worldCtx groupCtx
+  onDelete : GroupDeleteAction worldCtx groupCtx
 
-/--
-Used with `Query.init`.
-
-`α` - world context type.
-`β` - group context type.
--/
-structure QueryDesc (α β : Type) where
+/-- Used with `Query.init`. -/
+structure QueryDesc (worldCtx groupCtx : Type) where
   /-- Query terms -/
   terms : Array Term := #[]
   terms_size_lt : terms.size < termCountMax := by decide
@@ -417,7 +409,7 @@ structure QueryDesc (α β : Type) where
   /-- Flags for enabling query features. -/
   flags : QueryFlags := 0
   orderBy : OrderBy := .none
-  groupBy : Option (GroupBy α β) := .none
+  groupBy : Option (GroupBy worldCtx groupCtx) := .none
   /-- Entity associated with query (optional). -/
   entity : Entity := 0
 

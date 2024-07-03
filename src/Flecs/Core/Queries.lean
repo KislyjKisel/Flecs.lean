@@ -85,7 +85,7 @@ opaque Query.iter (world : @& World α) (query : @& Query β) : BaseIO (Iter α)
 
 /-- Progress query iterator. Returns `true` if the iterator has more results, `false` if not. -/
 @[extern "lean_flecs_Iter_queryNext"]
-opaque Iter.queryNext (world : @& Iter α) : BaseIO Bool
+opaque Iter.queryNext (it : @& Iter α) : BaseIO Bool
 
 /--
 Match entity with query.

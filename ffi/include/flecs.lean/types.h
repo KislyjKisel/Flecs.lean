@@ -38,6 +38,10 @@ static inline lean_object* lean_flecs_Iter_box(ecs_iter_t it) {
     return lean_alloc_external(lean_flecs_Iter_class, it_box);
 }
 
+static inline lean_object* lean_flecs_Iter_boxP(ecs_iter_t* it) {
+    return lean_alloc_external(lean_flecs_Iter_class, it);
+}
+
 #define lean_flecs_Iter_toRepr lean_flecs_Iter_box
 
 #define LEAN_FLECS_TableRange_LAYOUT 0, 3, 0, 0, 0, 0, 0

@@ -6,7 +6,9 @@
 LEAN_EXPORT lean_obj_res lean_flecs_World_pipelineInit(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
     ecs_pipeline_desc_t desc_c = {};
     desc_c.entity = lean_ctor_get_uint64(desc, sizeof(lean_object*));
-    desc_c.query = lean_flecs_QueryDesc_fromRepr(desc);
+    lean_object* queryDesc = lean_ctor_get(desc, 0);
+    lean_inc_ref(queryDesc);
+    desc_c.query = lean_flecs_QueryDesc_fromRepr(queryDesc);
     return lean_io_result_mk_ok(lean_flecs_Entity_box(ecs_pipeline_init(lean_flecs_World_fromRepr(world), &desc_c)));
 }
 

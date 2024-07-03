@@ -57,7 +57,7 @@ static inline void lean_flecs_GroupDeleteAction_wrapper(ecs_world_t* world, uint
     lean_dec_ref(lean_apply_4(callback, lean_flecs_World_box(world), lean_box_uint64(group_id), group_by_ctx, lean_box(0)));
 }
 
-// `desc` gets stored in result's `.binding_ctx`.
+// `desc` gets stored in result's `.binding_ctx` (and will be freed by `.binding_ctx_free`).
 static inline ecs_query_desc_t lean_flecs_QueryDesc_fromRepr(lean_obj_arg desc) {
     ecs_query_desc_t desc_c = {};
     desc_c.binding_ctx = desc; // to keep strings alive

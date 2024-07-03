@@ -5,7 +5,7 @@ namespace Flecs
 variable {α : Type}
 
 /-- Initialization action for modules -/
-def ModuleAction (α) := World α → BaseIO Unit
+def ModuleAction (worldCtx) := World worldCtx → BaseIO Unit
 
 /--
 Import a module.
