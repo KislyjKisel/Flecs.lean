@@ -6,19 +6,19 @@
 
 // Creating & Deleting
 
-LEAN_EXPORT lean_obj_res lean_flecs_new(b_lean_obj_arg world, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_new(b_lean_obj_arg world, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(
         ecs_new(lean_flecs_World_fromRepr(world))
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_newLowId(b_lean_obj_arg world, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_newLowId(b_lean_obj_arg world, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(
         ecs_new_low_id(lean_flecs_World_fromRepr(world))
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_newWithId(b_lean_obj_arg world, uint64_t id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_newWithId(b_lean_obj_arg world, uint64_t id, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(
         ecs_new_w_id(lean_flecs_World_fromRepr(world), lean_flecs_Id_fromRepr(id))
     ));
@@ -36,7 +36,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_entityInit(lean_flecs_World world, b_l
     return lean_io_result_mk_ok(lean_flecs_Entity_box(entity));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_clone(b_lean_obj_arg world, uint64_t dst, uint64_t src, uint8_t copyValue, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_clone(b_lean_obj_arg world, uint64_t src, uint64_t dst, uint8_t copyValue, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(ecs_clone(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(dst),
@@ -45,12 +45,12 @@ LEAN_EXPORT lean_obj_res lean_flecs_clone(b_lean_obj_arg world, uint64_t dst, ui
     )));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_delete(b_lean_obj_arg world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_delete(b_lean_obj_arg world, lean_flecs_Entity entity, lean_obj_arg io_) {
     ecs_delete(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_deleteWith(b_lean_obj_arg world, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_deleteWith(b_lean_obj_arg world, lean_flecs_Id id, lean_obj_arg io_) {
     ecs_delete_with(lean_flecs_World_fromRepr(world), lean_flecs_Id_fromRepr(id));
     return lean_io_result_mk_ok(lean_box(0));
 }
@@ -58,7 +58,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_deleteWith(b_lean_obj_arg world, lean_flecs_
 
 // Adding & Removing
 
-LEAN_EXPORT lean_obj_res lean_flecs_addId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_addId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
     ecs_add_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -67,7 +67,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_addId(lean_flecs_World world, lean_flecs_Ent
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_removeId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_removeId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
     ecs_remove_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -76,7 +76,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_removeId(lean_flecs_World world, lean_flecs_
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_autoOverrideId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_autoOverrideId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
     ecs_auto_override_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -85,7 +85,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_autoOverrideId(lean_flecs_World world, lean_
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_clear(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_clear(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     ecs_clear(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity)
@@ -93,7 +93,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_clear(lean_flecs_World world, lean_flecs_Ent
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_removeAll(lean_flecs_World world, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_removeAll(lean_flecs_World world, lean_flecs_Id id, lean_obj_arg io_) {
     ecs_remove_all(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Id_fromRepr(id)
@@ -101,13 +101,13 @@ LEAN_EXPORT lean_obj_res lean_flecs_removeAll(lean_flecs_World world, lean_flecs
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_setWith(lean_flecs_World world, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_setWith(lean_flecs_World world, lean_flecs_Id id, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(
         ecs_set_with(lean_flecs_World_fromRepr(world), lean_flecs_Id_fromRepr(id))
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_getWith(lean_flecs_World world, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_World_getWith(lean_flecs_World world, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Id_box(
         ecs_get_with(lean_flecs_World_fromRepr(world))
     ));
@@ -116,7 +116,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_getWith(lean_flecs_World world, lean_obj_arg
 
 // Enabling & Disabling
 
-LEAN_EXPORT lean_obj_res lean_flecs_enable(lean_flecs_World world, lean_flecs_Entity entity, uint8_t enabled, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_enable(lean_flecs_World world, lean_flecs_Entity entity, uint8_t enabled, lean_obj_arg io_) {
     ecs_enable(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -125,7 +125,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_enable(lean_flecs_World world, lean_flecs_En
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_enableId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, uint8_t enable, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_enableId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, uint8_t enable, lean_obj_arg io_) {
     ecs_enable_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -135,7 +135,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_enableId(lean_flecs_World world, lean_flecs_
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_isEnabledId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_isEnabledId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box(ecs_is_enabled_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -348,29 +348,29 @@ LEAN_EXPORT lean_obj_res lean_flecs_Entity_modified(
 
 // Liveliness
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_isValid(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_isValid(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box(
         ecs_is_valid(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity))
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_isAlive(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_isAlive(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box(
         ecs_is_alive(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity))
     ));
 }
 
-LEAN_EXPORT lean_flecs_Id lean_flecs_World_stripGeneration(lean_flecs_Entity entity) {
+LEAN_EXPORT lean_flecs_Id lean_flecs_Entity_stripGeneration(lean_flecs_Entity entity) {
     return lean_flecs_Id_toRepr(ecs_strip_generation(lean_flecs_Entity_fromRepr(entity)));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_getAlive(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getAlive(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(
         ecs_get_alive(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity))
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_makeAlive(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_makeAlive(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     ecs_make_alive(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
     return lean_io_result_mk_ok(lean_box(0));
 }
@@ -380,13 +380,13 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_makeAliveId(lean_flecs_World world, le
     return lean_io_result_mk_ok(lean_box(0));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_exists(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_exists(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box(
         ecs_exists(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity))
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_setGeneration(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_setGeneration(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     ecs_set_generation(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
     return lean_io_result_mk_ok(lean_box(0));
 }
@@ -394,7 +394,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_setGeneration(lean_flecs_World world, 
 
 // Information
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_getType(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getType(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     const ecs_type_t* type = ecs_get_type(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
     if (type == NULL) {
         return lean_io_result_mk_ok(lean_mk_empty_array());
@@ -406,7 +406,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_getType(lean_flecs_World world, lean_f
     return lean_io_result_mk_ok(arr);
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_getTable(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getTable(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Table_box(
         ecs_get_table(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity))
     ));
@@ -419,14 +419,14 @@ LEAN_EXPORT lean_obj_res lean_flecs_Table_str(lean_flecs_World world, lean_flecs
     return lean_io_result_mk_ok(s);
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_entityStr(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_str(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     char* s_c = ecs_entity_str(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
     lean_object* s = lean_mk_string(s_c);
     ecs_os_free(s_c);
     return lean_io_result_mk_ok(s);
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_hasId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_hasId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box(ecs_has_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -434,7 +434,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_hasId(lean_flecs_World world, lean_fle
     )));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_ownsId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_ownsId(lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box(ecs_owns_id(
         lean_flecs_World_fromRepr(world),
         lean_flecs_Entity_fromRepr(entity),
@@ -442,7 +442,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_ownsId(lean_flecs_World world, lean_fl
     )));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_getTarget(
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getTarget(
     lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Entity rel, lean_pod_Int32 index,
     lean_obj_arg io_
 ) {
@@ -454,13 +454,13 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_getTarget(
     )));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_getParent(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getParent(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(
         ecs_get_parent(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity))
     ));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_getTargetForId(
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getTargetForId(
     lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Entity rel, lean_flecs_Id id,
     lean_obj_arg io_
 ) {
@@ -472,7 +472,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_getTargetForId(
     )));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_World_getDepth(
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getDepth(
     lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Entity rel, lean_obj_arg io_
 ) {
     return lean_io_result_mk_ok(lean_pod_Int32_box(ecs_get_depth(

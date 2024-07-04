@@ -25,8 +25,8 @@ structure Timer where
   singleShot : Bool
 deriving Repr, Inhabited
 
-@[inherit_doc Entity.timer]
-abbrev Timer.id : Entity := Entity.timer
+@[inherit_doc Builtin.timer]
+abbrev Timer.id : Entity := Builtin.timer
 
 instance : Storable Timer where
   byteSize := 20
@@ -47,8 +47,8 @@ structure RateFilter where
   timeElapsed : FTime
 deriving Repr, Inhabited
 
-@[inherit_doc Entity.rateFilter]
-abbrev RateFilter.id : Entity := Entity.rateFilter
+@[inherit_doc Builtin.rateFilter]
+abbrev RateFilter.id : Entity := Builtin.rateFilter
 
 instance : Storable RateFilter where
   byteSize := 24

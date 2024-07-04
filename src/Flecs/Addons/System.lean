@@ -20,8 +20,8 @@ structure TickSource where
   timeElapsed : FTime
 deriving Repr, Inhabited
 
-@[inherit_doc Entity.tickSource]
-abbrev TickSource.id : Entity := Entity.tickSource
+@[inherit_doc Builtin.tickSource]
+abbrev TickSource.id : Entity := Builtin.tickSource
 
 instance : Storable TickSource where
   byteSize := 8

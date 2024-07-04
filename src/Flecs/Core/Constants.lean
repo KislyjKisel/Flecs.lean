@@ -23,7 +23,7 @@ end Id
 
 /-! # Builtin component ids -/
 
-namespace Id
+namespace Builtin
 
 /--
 Value used to quickly check if component is builtin.
@@ -42,10 +42,6 @@ The first user-defined entity starts from this id.
 Ids up to this number are reserved for builtin entities.
 -/
 define_foreign_constant firstUserEntityId : Id := "lean_flecs_firstUserEntityId"
-
-end Id
-
-namespace Entity
 
 /-- Component component id. -/
 define_foreign_constant component : Entity := "lean_flecs_c_component"
@@ -315,4 +311,4 @@ define_foreign_constant postFrame : Entity := "lean_flecs_c_postFrame"
 /-- Phase pipeline phase. -/
 define_foreign_constant phase : Entity := "lean_flecs_c_phase"
 
-end Entity
+end Builtin

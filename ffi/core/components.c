@@ -26,8 +26,8 @@ LEAN_EXPORT lean_obj_res lean_flecs_componentUnboxed(b_lean_obj_arg world, b_lea
 }
 
 static void lean_flecs_component_ctor(void *ptr, int32_t count, const ecs_type_info_t *type_info) {
+    lean_inc_n(type_info->hooks.binding_ctx, count);
     for (int32_t i = 0; i < count; ++i) {
-        lean_inc(type_info->hooks.binding_ctx);
         *((lean_object**)ptr + i) = type_info->hooks.binding_ctx;
     }
 }

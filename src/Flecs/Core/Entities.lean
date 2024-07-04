@@ -17,7 +17,7 @@ Create new entity id.
 This operation returns an unused entity id.
 This operation is guaranteed to return an empty entity as it does not use values set by `setScope` or `setWith`.
 -/
-@[extern "lean_flecs_new"]
+@[extern "lean_flecs_World_new"]
 opaque World.new (world : @& World α) : BaseIO Entity
 
 /--
@@ -36,7 +36,7 @@ it does not use values set by `setScope` or `setWith`.
 
 This operation does not recycle ids.
 -/
-@[extern "lean_flecs_newLowId"]
+@[extern "lean_flecs_World_newLowId"]
 opaque World.newLowId (world : @& World α) : BaseIO Entity
 
 /--
@@ -45,7 +45,7 @@ Create new entity with (component) id.
 This operation creates a new entity with an optional (component) id.
 When 0 is passed to the id parameter, no component is added to the new entity.
 -/
-@[extern "lean_flecs_newWithId"]
+@[extern "lean_flecs_World_newWithId"]
 opaque World.newWithId (world : @& World α) (id : Id) : BaseIO Entity
 
 /--
@@ -67,8 +67,8 @@ This is to prevent having two entities with the same name under the same parent,
 
 Returns the destination entity.
 -/
-@[extern "lean_flecs_clone"]
-opaque World.clone (world : @& World α) (dst src : Entity) (copyValue : Bool) : BaseIO Entity
+@[extern "lean_flecs_Entity_clone"]
+opaque Entity.clone (world : @& World α) (src dst : Entity) (copyValue : Bool) : BaseIO Entity
 
 /--
 Delete an entity.
@@ -77,8 +77,8 @@ This operation will delete an entity and all of its components.
 The entity id will be made available for recycling.
 If the entity passed to `delete` is not alive, the operation will have no side effects.
 -/
-@[extern "lean_flecs_delete"]
-opaque World.delete (world : @& World α) (entity : Entity) : BaseIO Unit
+@[extern "lean_flecs_Entity_delete"]
+opaque Entity.delete (world : @& World α) (entity : Entity) : BaseIO Unit
 
 /--
 Delete all entities with the specified id.
@@ -86,7 +86,7 @@ Delete all entities with the specified id.
 This will delete all entities (tables) that have the specified id.
 The id may be a wildcard and/or a pair.
 -/
-@[extern "lean_flecs_deleteWith"]
+@[extern "lean_flecs_World_deleteWith"]
 opaque World.deleteWith (world : @& World α) (id : Id) : BaseIO Unit
 
 -- TODO: ecs_new_w_table ecs_bulk_new_w_id ecs_bulk_init
@@ -100,8 +100,8 @@ Add a (component) id to an entity.
 This operation adds a single (component) id to an entity.
 If the entity already has the id, this operation will have no side effects.
 -/
-@[extern "lean_flecs_addId"]
-opaque World.addId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
+@[extern "lean_flecs_Entity_addId"]
+opaque Entity.addId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
 
 /--
 Remove a (component) id from an entity.
@@ -109,8 +109,8 @@ Remove a (component) id from an entity.
 This operation removes a single (component) id to an entity.
 If the entity does not have the id, this operation will have no side effects.
 -/
-@[extern "lean_flecs_removeId"]
-opaque World.removeId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
+@[extern "lean_flecs_Entity_removeId"]
+opaque Entity.removeId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
 
 /--
 Add auto override for (component) id.
@@ -128,23 +128,23 @@ is only useful for components with the (OnInstantiate, Inherit) trait.
 When a component has the (OnInstantiate, DontInherit) trait and is overridden
 the component is added, but the value from the prefab will not be copied.
 -/
-@[extern "lean_flecs_autoOverrideId"]
-opaque World.autoOverrideId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
+@[extern "lean_flecs_Entity_autoOverrideId"]
+opaque Entity.autoOverrideId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
 
 /--
 Clear all components.
 
 This operation will remove all components from an entity.
 -/
-@[extern "lean_flecs_clear"]
-opaque World.clear (world : @& World α) (entity : Entity) : BaseIO Unit
+@[extern "lean_flecs_Entity_clear"]
+opaque Entity.clear (world : @& World α) (entity : Entity) : BaseIO Unit
 
 /--
 Remove all instances of the specified (component) id.
 
 This will remove the specified id from all entities (tables). The id may be a wildcard and/or a pair.
 -/
-@[extern "lean_flecs_removeAll"]
+@[extern "lean_flecs_World_removeAll"]
 opaque World.removeAll (world : @& World α) (id : Id) : BaseIO Unit
 
 /--
@@ -152,11 +152,11 @@ Set current with id.
 
 New entities are automatically created with the specified id.
 -/
-@[extern "lean_flecs_setWith"]
+@[extern "lean_flecs_World_setWith"]
 opaque World.setWith (world : @& World α) (id : Id) : BaseIO Entity
 
 /-- Get the id set with `setWith`. -/
-@[extern "lean_flecs_getWith"]
+@[extern "lean_flecs_World_getWith"]
 opaque World.getWith (world : @& World α) : BaseIO Id
 
 
@@ -169,8 +169,8 @@ This operation enables or disables an entity by adding or removing the `disabled
 A disabled entity will not be matched with any systems,
 unless the system explicitly specifies the `disabled` tag.
 -/
-@[extern "lean_flecs_enable"]
-opaque World.enable (world : @& World α) (entity : Entity) (enabled : Bool) : BaseIO Unit
+@[extern "lean_flecs_Entity_enable"]
+opaque Entity.enable (world : @& World α) (entity : Entity) (enabled : Bool) : BaseIO Unit
 
 /--
 Enable or disable component.
@@ -181,8 +181,8 @@ This operation can be useful when a component must be temporarily disabled witho
 It is also a more performant operation for when an application needs to
 add/remove components at high frequency, as enabling/disabling is cheaper than a regular add or remove.
 -/
-@[extern "lean_flecs_enableId"]
-opaque World.enableId (world : @& World α) (entity : Entity) (id : Id) (enable : Bool) : BaseIO Unit
+@[extern "lean_flecs_Entity_enableId"]
+opaque Entity.enableId (world : @& World α) (entity : Entity) (id : Id) (enable : Bool) : BaseIO Unit
 
 /--
 Test if component is enabled.
@@ -191,8 +191,8 @@ Test whether a component is currently enabled or disabled.
 This operation will return true when the entity has the component and
 if it has not been disabled by `enableId`.
 -/
-@[extern "lean_flecs_isEnabledId"]
-opaque World.isEnabledId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
+@[extern "lean_flecs_Entity_isEnabledId"]
+opaque Entity.isEnabledId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
 
 
 /-! # Getting and setting -/
@@ -286,8 +286,8 @@ An entity is valid if it is not `0` and if it is alive.
 This allows for using ids that have never been created by `World.newWithId` or similar.
 In this the function differs from `World.isAlive`, which will return `false` for entities that do not yet exist.
 -/
-@[extern "lean_flecs_World_isValid"]
-opaque World.isValid (world : @& World α) (entity : Entity) : BaseIO Bool
+@[extern "lean_flecs_Entity_isValid"]
+opaque Entity.isValid (world : @& World α) (entity : Entity) : BaseIO Bool
 
 /--
 Test whether an entity is alive.
@@ -310,12 +310,12 @@ world.isAlive e2 -- true
 world.isAlive e1 -- false
 ```
 -/
-@[extern "lean_flecs_World_isAlive"]
-opaque World.isAlive (world : @& World α) (entity : Entity) : BaseIO Bool
+@[extern "lean_flecs_Entity_isAlive"]
+opaque Entity.isAlive (world : @& World α) (entity : Entity) : BaseIO Bool
 
 /-- Remove generation from entity id. -/
-@[extern "lean_flecs_World_stripGeneration"]
-opaque World.stripGeneration (entity : Entity) : Id
+@[extern "lean_flecs_Entity_stripGeneration"]
+opaque Entity.stripGeneration (entity : Entity) : Id
 
 /--
 Get alive identifier.
@@ -329,8 +329,8 @@ This function can retrieve the identifier with the current generation for that i
 
 If the provided identifier is not alive, the function will return `0`.
 -/
-@[extern "lean_flecs_World_getAlive"]
-opaque World.getAlive (world : @& World α) (entity : Entity) : BaseIO Entity
+@[extern "lean_flecs_Entity_getAlive"]
+opaque Entity.getAlive (world : @& World α) (entity : Entity) : BaseIO Entity
 
 /--
 Ensure id is alive.
@@ -349,8 +349,8 @@ the id will be created with the specified generation.
 If the provided id is alive and has a generation count that does not match the provided id,
 the operation will fail.
 -/
-@[extern "lean_flecs_World_makeAlive"]
-opaque World.makeAlive (world : @& World α) (entity : Entity) : BaseIO Unit
+@[extern "lean_flecs_Entity_makeAlive"]
+opaque Entity.makeAlive (world : @& World α) (entity : Entity) : BaseIO Unit
 
 /--
 Same as `World.makeAlive`, but for (component) ids.
@@ -374,8 +374,8 @@ opaque World.makeAliveId (world : @& World α) (id : Id) : BaseIO Unit
 Test whether an entity exists.
 Similar as `World.isAlive`, but ignores entity generation count.
 -/
-@[extern "lean_flecs_World_exists"]
-opaque World.exists (world : @& World α) (entity : Entity) : BaseIO Bool
+@[extern "lean_flecs_Entity_exists"]
+opaque Entity.exists (world : @& World α) (entity : Entity) : BaseIO Bool
 
 /--
 Override the generation of an entity.
@@ -389,19 +389,19 @@ like for external pools, savefiles or netcode.
 This operation is similar to `World.makeAlive`, except that it will also
 override the generation of an alive entity.
 -/
-@[extern "lean_flecs_World_setGeneration"]
-opaque World.setGeneration (world : @& World α) (entity : Entity) : BaseIO Unit
+@[extern "lean_flecs_Entity_setGeneration"]
+opaque Entity.setGeneration (world : @& World α) (entity : Entity) : BaseIO Unit
 
 
 /-! # Information -/
 
 /-- Get the type of an entity (array with ids). -/
-@[extern "lean_flecs_World_getType"]
-opaque World.getType (world : @& World α) (entity : Entity) : BaseIO «Type»
+@[extern "lean_flecs_Entity_getType"]
+opaque Entity.getType (world : @& World α) (entity : Entity) : BaseIO «Type»
 
 /-- Get the table of an entity. -/
-@[extern "lean_flecs_World_getTable"]
-opaque World.getTable (world : @& World α) (entity : Entity) : BaseIO Table
+@[extern "lean_flecs_Entity_getTable"]
+opaque Entity.getTable (world : @& World α) (entity : Entity) : BaseIO Table
 
 /--
 Convert table to string.
@@ -415,15 +415,15 @@ Convert entity to string.
 
 [...]
 -/
-@[extern "lean_flecs_World_entityStr"]
-opaque World.entityStr (world : @& World α) (entity : Entity) : BaseIO String
+@[extern "lean_flecs_Entity_str"]
+opaque Entity.str (world : @& World α) (entity : Entity) : BaseIO String
 
 /--
 Test if an entity has an id.
 This operation returns `true` if the entity has or inherits the specified id.
 -/
-@[extern "lean_flecs_World_hasId"]
-opaque World.hasId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
+@[extern "lean_flecs_Entity_hasId"]
+opaque Entity.hasId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
 
 /--
 Test if an entity owns an id.
@@ -431,8 +431,8 @@ This operation returns `true` if the entity has the specified id.
 The operation behaves the same as `World.hasId`, except that it will return `false` for
 components that are inherited through an `IsA` relationship.
 -/
-@[extern "lean_flecs_World_ownsId"]
-opaque World.ownsId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
+@[extern "lean_flecs_Entity_ownsId"]
+opaque Entity.ownsId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
 
 /--
 Get the target of a relationship.
@@ -443,18 +443,18 @@ if a single entity has multiple targets for the same relationship.
 If the index is larger than the total number of instances the entity has for the relationship,
 the operation will return `0`.
 -/
-@[extern "lean_flecs_World_getTarget"]
-opaque World.getTarget (world : @& World α) (entity rel : Entity) (index : Int32) : BaseIO Entity
+@[extern "lean_flecs_Entity_getTarget"]
+opaque Entity.getTarget (world : @& World α) (entity rel : Entity) (index : Int32) : BaseIO Entity
 
 /--
 Get parent (target of `ChildOf` relationship) for entity.
 This operation is the same as calling:
 ```lean4
-world.getTarget entity Entity.childOf 0
+world.getTarget entity Builtin.childOf 0
 ```
 -/
-@[extern "lean_flecs_World_getParent"]
-opaque World.getParent (world : @& World α) (entity : Entity) : BaseIO Entity
+@[extern "lean_flecs_Entity_getParent"]
+opaque Entity.getParent (world : @& World α) (entity : Entity) : BaseIO Entity
 
 /--
 Get the target of a relationship for a given id.
@@ -468,8 +468,8 @@ which prefab is providing a component by specifying the `IsA` relationship:
 world.getTargetForId entity Entity.isA Position.id
 ```
 -/
-@[extern "lean_flecs_World_getTargetForId"]
-opaque World.getTargetForId (world : @& World α) (entity rel : Entity) (id : Id) : BaseIO Entity
+@[extern "lean_flecs_Entity_getTargetForId"]
+opaque Entity.getTargetForId (world : @& World α) (entity rel : Entity) (id : Id) : BaseIO Entity
 
 /--
 Return depth for entity in tree for the specified relationship.
@@ -477,8 +477,8 @@ Depth is determined by counting the number of targets encountered while
 traversing up the relationship tree for `rel`.
 Only acyclic relationships are supported.
 -/
-@[extern "lean_flecs_World_getDepth"]
-opaque World.getDepth (world : @& World α) (entity rel : Entity) : BaseIO Int32
+@[extern "lean_flecs_Entity_getDepth"]
+opaque Entity.getDepth (world : @& World α) (entity rel : Entity) : BaseIO Int32
 
 /-- Count entities that have the specified id. -/
 @[extern "lean_flecs_World_countId"]
