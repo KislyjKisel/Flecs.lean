@@ -3,9 +3,11 @@
 #include <flecs.lean/types.h>
 
 LEAN_POD_DEFINE_EXTERNAL_CLASS(flecs_Iter)
+LEAN_POD_DEFINE_EXTERNAL_CLASS(flecs_Ref)
 
 LEAN_EXPORT lean_obj_res lean_flecs_initialize_types(lean_obj_arg io_) {
     LEAN_POD_INITIALIZE_EXTERNAL_CLASS(flecs_Iter, lean_pod_free, lean_pod_default_foreach);
+    LEAN_POD_INITIALIZE_EXTERNAL_CLASS(flecs_Ref, lean_pod_free, lean_pod_default_foreach);
     return lean_io_result_mk_ok(lean_box(0));
 }
 

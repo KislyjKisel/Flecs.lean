@@ -1,11 +1,13 @@
 import Pod.Int
+import Pod.ReadBytes
+import Pod.WriteBytes
 import Flecs.Core.Types
 
-open Pod (Int32)
+open Pod (Int32 Storable ReadBytes WriteBytes)
 
 namespace Flecs
 
-variable {α : Type}
+variable {α τ : Type}
 
 /-! # Creating & Deleting -/
 
@@ -195,7 +197,80 @@ opaque World.isEnabledId (world : @& World α) (entity : Entity) (id : Id) : Bas
 
 /-! # Getting and setting -/
 
--- TODO
+@[extern "lean_flecs_Entity_get"]
+opaque Entity.get (world : @& World α) (entity : Entity) (τ : Type) (id : Id) : BaseIO (Option τ)
+
+@[extern "lean_flecs_Entity_getUnboxed"]
+opaque Entity.getUnboxed (world : @& World α) (entity : Entity) (τ : Type) [@& Storable τ] [@& ReadBytes τ] (id : Id) : BaseIO (Option α)
+
+/--
+Set component data.
+Does nothing if the entity doesn't own the component (doesn't have `id` or it is inherited).
+-/
+@[extern "lean_flecs_Entity_set"]
+opaque Entity.set (world : @& World α) (entity : Entity) (id : Id) (value : τ) : BaseIO Unit
+
+/--
+Set component data.
+Does nothing if the entity doesn't own the component (doesn't have `id` or it is inherited).
+-/
+@[extern "lean_flecs_Entity_setUnboxed"]
+opaque Entity.setUnboxed (world : @& World α) (entity : Entity) (id : Id) [@& Storable τ] [@& WriteBytes τ] (value : τ) : BaseIO Unit
+
+/--
+Set component data.
+If the component did not yet exist, it will be added.
+Pass `modified := true` to use `ecs_ensure_modified_id` (only valid when the world is in deferred
+mode, which ensures that the `Modified` event is not emitted before the modification takes place).
+-/
+@[extern "lean_flecs_Entity_set_2"]
+opaque Entity.set' (world : @& World α) (entity : Entity) (id : Id) (value : τ) (modified : Bool := false) : BaseIO Unit
+
+/--
+Set component data.
+If the component did not yet exist, it will be added.
+Pass `modified := true` to use `ecs_ensure_modified_id` (only valid when the world is in deferred
+mode, which ensures that the `Modified` event is not emitted before the modification takes place).
+-/
+@[extern "lean_flecs_Entity_setUnboxed_2"]
+opaque Entity.setUnboxed' (world : @& World α) (entity : Entity) (id : Id) [@& Storable τ] [@& WriteBytes τ] (value : τ) (modified : Bool := false) : BaseIO Unit
+
+/--
+Create a component ref.
+A ref is a handle to an entity + component which caches a small amount of
+data to reduce overhead of repeatedly accessing the component.
+Use `Ref.get` and `Ref.set` to access the component data.
+-/
+@[extern "lean_flecs_Entity_ref"]
+opaque Entity.ref (world : @& World α) (entity : Entity) (τ : Type) (id : Id) : BaseIO (Ref τ)
+
+/-- Update ref. Ensures contents of ref are up to date. -/
+@[extern "lean_flecs_Ref_update"]
+opaque Ref.update (world : @& World α) (ref : @& Ref τ) : BaseIO Unit
+
+@[extern "lean_flecs_Ref_get"]
+opaque Ref.get (world : @& World α) (ref : @& Ref τ) : BaseIO (Option τ)
+
+@[extern "lean_flecs_Ref_getUnboxed"]
+opaque Ref.getUnboxed (world : @& World α) (ref : @& Ref τ) [@& Storable τ] [@& ReadBytes τ] : BaseIO (Option τ)
+
+@[extern "lean_flecs_Ref_set"]
+opaque Ref.set (world : @& World α) (ref : @& Ref τ) (value : τ) : BaseIO Unit
+
+@[extern "lean_flecs_Ref_setUnboxed"]
+opaque Ref.setUnboxed (world : @& World α) (ref : @& Ref τ) (value : τ) [@& Storable τ] [@& WriteBytes τ] : BaseIO Unit
+
+-- TODO: ecs_record_find ecs_write_begin ecs_write_end ecs_read_begin ecs_read_end
+-- TODO: ecs_record_get_entity ecs_record_get_id ecs_record_ensure_id ecs_record_has_id ecs_record_get_by_column
+-- TODO: ecs_emplace_id (?)
+
+/--
+Signal that a component has been modified.
+This operation is usually used after modifying a component value.
+The operation will mark the component as dirty, and invoke `OnSet` observers and hooks.
+-/
+@[extern "lean_flecs_Entity_modified"]
+opaque Entity.modified (world : @& World α) (entity : Entity) (id : Id) : BaseIO Unit
 
 
 /-! # Liveliness -/

@@ -83,9 +83,8 @@ Used for iterating queries.
 -/
 define_foreign_type Iter (worldCtx : Type)
 
--- Unused
--- /-- A ref is a fast way to fetch a component for a specific entity. -/
--- define_foreign_type Ref
+/-- A ref is a fast way to fetch a component for a specific entity. -/
+define_foreign_type Ref (componentType : Type)
 
 -- C only
 -- /-- Type hooks are callbacks associated with component lifecycle events. -/

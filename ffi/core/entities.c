@@ -146,7 +146,204 @@ LEAN_EXPORT lean_obj_res lean_flecs_isEnabledId(lean_flecs_World world, lean_fle
 
 // Getting and setting
 
-// TODO
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_get(
+    lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_
+) {
+    const void* p = ecs_get_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(id)
+    );
+    if (p == NULL) {
+        return lean_io_result_mk_ok(lean_mk_option_none());
+    }
+    lean_object* x = *(lean_object**)p;
+    lean_inc(x);
+    return lean_io_result_mk_ok(lean_mk_option_some(x));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_getUnboxed(
+    lean_flecs_World world, lean_flecs_Entity entity, b_lean_obj_arg storable,
+    b_lean_obj_arg readBytes, lean_flecs_Id id, lean_obj_arg io_
+) {
+    const void* p = ecs_get_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(id)
+    );
+    if (p == NULL) {
+        return lean_io_result_mk_ok(lean_mk_option_none());
+    }
+    lean_object* readBytesRef = LEAN_POD_CTOR_GET(readBytes, LEAN_POD_ReadBytes_readBytesRef);
+    lean_inc_ref(readBytesRef);
+    lean_object* res_box = lean_apply_3(readBytesRef, lean_box(0), lean_pod_BytesRef_box((void*)p), lean_box(0));
+    lean_object* res = lean_ctor_get(res_box, 0);
+    lean_inc(res);
+    lean_dec_ref(res_box);
+    return lean_io_result_mk_ok(lean_mk_option_some(res));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_set(
+    lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg value, lean_obj_arg io_
+) {
+    void* p = ecs_get_mut_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(id)
+    );
+    if (LEAN_LIKELY(p != NULL)) {
+        lean_object* x = *(lean_object**)p;
+        lean_dec(x);
+        *(lean_object**)p = value;
+    }
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_setUnboxed(
+    lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id,
+    b_lean_obj_arg storable, b_lean_obj_arg writeBytes, lean_obj_arg value, lean_obj_arg io_
+) {
+    void* p = ecs_get_mut_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(id)
+    );
+    if (LEAN_LIKELY(p != NULL)) {
+        lean_object* writeBytesRef = LEAN_POD_CTOR_GET(writeBytes, LEAN_POD_WriteBytes_writeBytesRef);
+        lean_inc_ref(writeBytesRef);
+        lean_dec_ref(lean_apply_4(writeBytesRef, lean_box(0), lean_pod_BytesRef_box(p), value, lean_box(0)));
+    }
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_set_2(
+    lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id,
+    lean_obj_arg value, uint8_t modified, lean_obj_arg io_
+) {
+    void* p;
+    if (LEAN_UNLIKELY(modified)) {
+        p = ecs_ensure_modified_id(
+            lean_flecs_World_fromRepr(world),
+            lean_flecs_Entity_fromRepr(entity),
+            lean_flecs_Id_fromRepr(id)
+        );
+    } else {
+        p = ecs_ensure_id(
+            lean_flecs_World_fromRepr(world),
+            lean_flecs_Entity_fromRepr(entity),
+            lean_flecs_Id_fromRepr(id)
+        );
+    }
+    if (LEAN_LIKELY(p != NULL)) {
+        lean_object* x = *(lean_object**)p;
+        lean_dec(x);
+        *(lean_object**)p = value;
+    }
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_setUnboxed_2(
+    lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, b_lean_obj_arg storable,
+    b_lean_obj_arg writeBytes, lean_obj_arg value, uint8_t modified, lean_obj_arg io_
+) {
+    void* p;
+    if (LEAN_UNLIKELY(modified)) {
+        p = ecs_ensure_modified_id(
+            lean_flecs_World_fromRepr(world),
+            lean_flecs_Entity_fromRepr(entity),
+            lean_flecs_Id_fromRepr(id)
+        );
+    } else {
+        p = ecs_ensure_id(
+            lean_flecs_World_fromRepr(world),
+            lean_flecs_Entity_fromRepr(entity),
+            lean_flecs_Id_fromRepr(id)
+        );
+    }
+    if (LEAN_LIKELY(p != NULL)) {
+        lean_object* writeBytesRef = LEAN_POD_CTOR_GET(writeBytes, LEAN_POD_WriteBytes_writeBytesRef);
+        lean_inc_ref(writeBytesRef);
+        lean_dec_ref(lean_apply_4(writeBytesRef, lean_box(0), lean_pod_BytesRef_box(p), value, lean_box(0)));
+    }
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_ref(
+    lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_
+) {
+    return lean_io_result_mk_ok(lean_flecs_Ref_box(ecs_ref_init_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(id)
+    )));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Ref_update(lean_flecs_World world, lean_flecs_Ref ref, lean_obj_arg io_) {
+    ecs_ref_update(lean_flecs_World_fromRepr(world), lean_flecs_Ref_fromRepr(ref));
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Ref_get(lean_flecs_World world, lean_flecs_Ref ref, lean_obj_arg io_) {
+    ecs_ref_t* ref_c = lean_flecs_Ref_fromRepr(ref);
+    void* p = ecs_ref_get_id(lean_flecs_World_fromRepr(world), ref_c, ref_c->id);
+    if (p == NULL) {
+        return lean_io_result_mk_ok(lean_mk_option_none());
+    }
+    lean_object* x = *(lean_object**)p;
+    lean_inc(x);
+    return lean_io_result_mk_ok(lean_mk_option_some(x));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Ref_getUnboxed(lean_flecs_World world, lean_flecs_Ref ref, b_lean_obj_arg storable, b_lean_obj_arg readBytes, lean_obj_arg io_) {
+    ecs_ref_t* ref_c = lean_flecs_Ref_fromRepr(ref);
+    void* p = ecs_ref_get_id(lean_flecs_World_fromRepr(world), ref_c, ref_c->id);
+    if (p == NULL) {
+        return lean_io_result_mk_ok(lean_mk_option_none());
+    }
+    lean_object* readBytesRef = LEAN_POD_CTOR_GET(readBytes, LEAN_POD_ReadBytes_readBytesRef);
+    lean_inc_ref(readBytesRef);
+    lean_object* res_box = lean_apply_3(readBytesRef, lean_box(0), lean_pod_BytesRef_box((void*)p), lean_box(0));
+    lean_object* res = lean_ctor_get(res_box, 0);
+    lean_inc(res);
+    lean_dec_ref(res_box);
+    return lean_io_result_mk_ok(lean_mk_option_some(res));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Ref_set(lean_flecs_World world, lean_flecs_Ref ref, lean_obj_arg value, lean_obj_arg io_) {
+    ecs_ref_t* ref_c = lean_flecs_Ref_fromRepr(ref);
+    void* p = ecs_ref_get_id(lean_flecs_World_fromRepr(world), ref_c, ref_c->id);
+    if (LEAN_LIKELY(p != NULL)) {
+        lean_object* x = *(lean_object**)p;
+        lean_dec(x);
+        *(lean_object**)p = value;
+    }
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Ref_setUnboxed(
+    lean_flecs_World world, lean_flecs_Ref ref, b_lean_obj_arg storable,
+    b_lean_obj_arg writeBytes, lean_obj_arg value, lean_obj_arg io_
+) {
+    ecs_ref_t* ref_c = lean_flecs_Ref_fromRepr(ref);
+    void* p = ecs_ref_get_id(lean_flecs_World_fromRepr(world), ref_c, ref_c->id);
+    if (LEAN_LIKELY(p != NULL)) {
+        lean_object* writeBytesRef = LEAN_POD_CTOR_GET(writeBytes, LEAN_POD_WriteBytes_writeBytesRef);
+        lean_inc_ref(writeBytesRef);
+        lean_dec_ref(lean_apply_4(writeBytesRef, lean_box(0), lean_pod_BytesRef_box(p), value, lean_box(0)));
+    }
+    return lean_io_result_mk_ok(lean_box(0));
+}
+
+LEAN_EXPORT lean_obj_res lean_flecs_Entity_modified(
+    lean_flecs_World world, lean_flecs_Entity entity, lean_flecs_Id id, lean_obj_arg io_
+) {
+    ecs_modified_id(
+        lean_flecs_World_fromRepr(world),
+        lean_flecs_Entity_fromRepr(entity),
+        lean_flecs_Id_fromRepr(id)
+    );
+    return lean_io_result_mk_ok(lean_box(0));
+}
 
 
 // Liveliness

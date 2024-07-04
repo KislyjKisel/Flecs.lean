@@ -30,6 +30,7 @@ LEAN_POD_PTR_ALIAS(flecs_World, ecs_world_t*)
 LEAN_POD_PTR_ALIAS(flecs_Poly, ecs_poly_t*)
 LEAN_POD_PTR_ALIAS(flecs_Table, ecs_table_t*)
 LEAN_POD_PTR_ALIAS(flecs_Query, ecs_query_t*)
+
 LEAN_POD_DECLARE_EXTERNAL_CLASS(flecs_Iter, ecs_iter_t*)
 
 static inline lean_object* lean_flecs_Iter_box(ecs_iter_t it) {
@@ -43,6 +44,13 @@ static inline lean_object* lean_flecs_Iter_boxP(ecs_iter_t* it) {
 }
 
 #define lean_flecs_Iter_toRepr lean_flecs_Iter_box
+
+LEAN_POD_DECLARE_EXTERNAL_CLASS(flecs_Ref, ecs_ref_t*)
+
+static inline lean_object* lean_flecs_Ref_box(ecs_ref_t ref) {
+    ecs_ref_t* ref_p = lean_pod_alloc(sizeof(ecs_ref_t));
+    return lean_alloc_external(lean_flecs_Ref_class, ref_p);
+}
 
 #define LEAN_FLECS_TableRange_LAYOUT 0, 3, 0, 0, 0, 0, 0
 #define LEAN_FLECS_TableRange_table BOX, 0, LEAN_FLECS_TableRange_LAYOUT
