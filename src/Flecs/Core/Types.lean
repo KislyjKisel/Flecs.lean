@@ -45,6 +45,8 @@ instance : ReadBytes Id := inferInstanceAs (ReadBytes UInt64)
 
 abbrev Entity := Id
 
+abbrev «Type» := Array Id
+
 /--
 A world is the container for all ECS data and supporting features.
 Multiple isolated worlds may exist at the same time.

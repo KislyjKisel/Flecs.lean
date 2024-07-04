@@ -1,4 +1,7 @@
+import Pod.Int
 import Flecs.Core.Types
+
+open Pod (Int32)
 
 namespace Flecs
 
@@ -43,6 +46,11 @@ When 0 is passed to the id parameter, no component is added to the new entity.
 @[extern "lean_flecs_newWithId"]
 opaque World.newWithId (world : @& World α) (id : Id) : BaseIO Entity
 
+/--
+Find or create entity.
+
+[...]
+-/
 @[extern "lean_flecs_World_entityInit"]
 opaque World.entityInit (world : @& World α) (desc : @& EntityDesc) : BaseIO Entity
 
@@ -79,7 +87,7 @@ The id may be a wildcard and/or a pair.
 @[extern "lean_flecs_deleteWith"]
 opaque World.deleteWith (world : @& World α) (id : Id) : BaseIO Unit
 
--- TODO: ecs_new_w_table ecs_delete_with ecs_bulk_new_w_id ecs_bulk_init
+-- TODO: ecs_new_w_table ecs_bulk_new_w_id ecs_bulk_init
 
 
 /-! # Adding & Removing -/
@@ -192,12 +200,214 @@ opaque World.isEnabledId (world : @& World α) (entity : Entity) (id : Id) : Bas
 
 /-! # Liveliness -/
 
--- TODO
+/--
+Test whether an entity is valid.
+Entities that are valid can be used with API functions.
+Using invalid entities with API operations will cause the function to panic.
+
+An entity is valid if it is not `0` and if it is alive.
+
+`World.isValid` will return `true` for ids that don't exist (alive or not alive).
+This allows for using ids that have never been created by `World.newWithId` or similar.
+In this the function differs from `World.isAlive`, which will return `false` for entities that do not yet exist.
+-/
+@[extern "lean_flecs_World_isValid"]
+opaque World.isValid (world : @& World α) (entity : Entity) : BaseIO Bool
+
+/--
+Test whether an entity is alive.
+Entities are alive after they are created, and become not alive when they are deleted.
+Operations that return alive ids are (amongst others) `World.new`, `World.newLowId` and `World.entityInit`.
+Ids can be made alive with the `World.makeAlive` function.
+
+After an id is deleted it can be recycled.
+Recycled ids are different from the original id in that they have a different generation count.
+This makes it possible for the API to distinguish between the two.
+An example:
+
+```lean4
+let e1 ← world.new
+world.isAlive e1 -- true
+world.delete e1
+world.isAlive e1 -- false
+let e2 ← world.new -- recycles e1
+world.isAlive e2 -- true
+world.isAlive e1 -- false
+```
+-/
+@[extern "lean_flecs_World_isAlive"]
+opaque World.isAlive (world : @& World α) (entity : Entity) : BaseIO Bool
+
+/-- Remove generation from entity id. -/
+@[extern "lean_flecs_World_stripGeneration"]
+opaque World.stripGeneration (entity : Entity) : Id
+
+/--
+Get alive identifier.
+In some cases an application may need to work with identifiers from which the generation has been stripped.
+A typical scenario in which this happens is when iterating relationships in an entity type.
+
+For example, when obtaining the parent id from a ChildOf relationship, the parent
+(second element of the pair) will have been stored in a 32 bit value, which
+cannot store the entity generation.
+This function can retrieve the identifier with the current generation for that id.
+
+If the provided identifier is not alive, the function will return `0`.
+-/
+@[extern "lean_flecs_World_getAlive"]
+opaque World.getAlive (world : @& World α) (entity : Entity) : BaseIO Entity
+
+/--
+Ensure id is alive.
+This operation ensures that the provided id is alive.
+This is useful in scenarios where an application has an existing id that has not been created with
+`World.newWithId` (such as a global constant or an id from a remote application).
+
+When this operation is successful it guarantees that the provided id exists, is valid and is alive.
+
+Before this operation the id must either not be alive or have a generation that
+is equal to the passed in entity.
+
+If the provided id has a non-zero generation count and the id does not exist in the world,
+the id will be created with the specified generation.
+
+If the provided id is alive and has a generation count that does not match the provided id,
+the operation will fail.
+-/
+@[extern "lean_flecs_World_makeAlive"]
+opaque World.makeAlive (world : @& World α) (entity : Entity) : BaseIO Unit
+
+/--
+Same as `World.makeAlive`, but for (component) ids.
+An id can be an entity or pair, and can contain id flags.
+This operation ensures that the entity (or entities, for a pair) are alive.
+
+When this operation is successful it guarantees that the provided id can be
+used in operations that accept an id.
+
+Since entities in a pair do not encode their generation ids, this operation
+will not fail when an entity with non-zero generation count already exists in
+the world.
+
+This is different from `World.makeAlive`, which will fail if attempted with an id
+that has generation `0` and an entity with a non-zero generation is currently alive.
+-/
+@[extern "lean_flecs_World_makeAliveId"]
+opaque World.makeAliveId (world : @& World α) (id : Id) : BaseIO Unit
+
+/--
+Test whether an entity exists.
+Similar as `World.isAlive`, but ignores entity generation count.
+-/
+@[extern "lean_flecs_World_exists"]
+opaque World.exists (world : @& World α) (entity : Entity) : BaseIO Bool
+
+/--
+Override the generation of an entity.
+The generation count of an entity is increased each time an entity is deleted
+and is used to test whether an entity id is alive.
+
+This operation overrides the current generation of an entity with the
+specified generation, which can be useful if an entity is externally managed,
+like for external pools, savefiles or netcode.
+
+This operation is similar to `World.makeAlive`, except that it will also
+override the generation of an alive entity.
+-/
+@[extern "lean_flecs_World_setGeneration"]
+opaque World.setGeneration (world : @& World α) (entity : Entity) : BaseIO Unit
 
 
 /-! # Information -/
 
--- TODO
+/-- Get the type of an entity (array with ids). -/
+@[extern "lean_flecs_World_getType"]
+opaque World.getType (world : @& World α) (entity : Entity) : BaseIO «Type»
+
+/-- Get the table of an entity. -/
+@[extern "lean_flecs_World_getTable"]
+opaque World.getTable (world : @& World α) (entity : Entity) : BaseIO Table
+
+/--
+Convert table to string.
+Same as `world.typeStr (← table.getType)`.
+-/
+@[extern "lean_flecs_Table_str"]
+opaque Table.str (world : @& World α) (table : @& Table) : BaseIO String
+
+/--
+Convert entity to string.
+
+[...]
+-/
+@[extern "lean_flecs_World_entityStr"]
+opaque World.entityStr (world : @& World α) (entity : Entity) : BaseIO String
+
+/--
+Test if an entity has an id.
+This operation returns `true` if the entity has or inherits the specified id.
+-/
+@[extern "lean_flecs_World_hasId"]
+opaque World.hasId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
+
+/--
+Test if an entity owns an id.
+This operation returns `true` if the entity has the specified id.
+The operation behaves the same as `World.hasId`, except that it will return `false` for
+components that are inherited through an `IsA` relationship.
+-/
+@[extern "lean_flecs_World_ownsId"]
+opaque World.ownsId (world : @& World α) (entity : Entity) (id : Id) : BaseIO Bool
+
+/--
+Get the target of a relationship.
+This will return a target (second element of a pair) of the entity for the specified relationship.
+The index allows for iterating through the targets,
+if a single entity has multiple targets for the same relationship.
+
+If the index is larger than the total number of instances the entity has for the relationship,
+the operation will return `0`.
+-/
+@[extern "lean_flecs_World_getTarget"]
+opaque World.getTarget (world : @& World α) (entity rel : Entity) (index : Int32) : BaseIO Entity
+
+/--
+Get parent (target of `ChildOf` relationship) for entity.
+This operation is the same as calling:
+```lean4
+world.getTarget entity Entity.childOf 0
+```
+-/
+@[extern "lean_flecs_World_getParent"]
+opaque World.getParent (world : @& World α) (entity : Entity) : BaseIO Entity
+
+/--
+Get the target of a relationship for a given id.
+This operation returns the first entity that has the provided id by following the specified relationship.
+If the entity itself has the id then entity will be returned.
+If the id cannot be found on the entity or by following the relationship, the operation will return `0`.
+
+This operation can be used to lookup, for example,
+which prefab is providing a component by specifying the `IsA` relationship:
+```lean4
+world.getTargetForId entity Entity.isA Position.id
+```
+-/
+@[extern "lean_flecs_World_getTargetForId"]
+opaque World.getTargetForId (world : @& World α) (entity rel : Entity) (id : Id) : BaseIO Entity
+
+/--
+Return depth for entity in tree for the specified relationship.
+Depth is determined by counting the number of targets encountered while
+traversing up the relationship tree for `rel`.
+Only acyclic relationships are supported.
+-/
+@[extern "lean_flecs_World_getDepth"]
+opaque World.getDepth (world : @& World α) (entity rel : Entity) : BaseIO Int32
+
+/-- Count entities that have the specified id. -/
+@[extern "lean_flecs_World_countId"]
+opaque World.countId (world : @& World α) (entity : Id) : BaseIO Int32
 
 
 /-! # Names -/
