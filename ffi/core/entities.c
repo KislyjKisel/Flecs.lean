@@ -199,6 +199,9 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_setGeneration(lean_flecs_World world, 
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_getType(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
     const ecs_type_t* type = ecs_get_type(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
+    if (type == NULL) {
+        return lean_io_result_mk_ok(lean_mk_empty_array());
+    }
     lean_object* arr = lean_alloc_array(type->count, type->count);
     for (size_t i = 0; i < type->count; ++i) {
         lean_array_set_core(arr, i, lean_flecs_Id_box(type->array[i]));
