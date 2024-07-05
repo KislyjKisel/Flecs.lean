@@ -4,6 +4,8 @@ open Lake DSL
 def splitArgStr (s : String) : Array String :=
   Array.mk $ s.splitOn.filter $ not ∘ String.isEmpty
 
+def optionManual := get_config? manual |>.isSome
+def optionGit := get_config? git |>.getD "git"
 def optionCompilerFlecs := (get_config? flecs_cc).getD "cc"
 def optionCompilerBindings := (get_config? bindings_cc).getD "cc"
 def optionFlagsCompileFlecs := splitArgStr $ (get_config? flecs_cflags).getD ""
@@ -22,7 +24,28 @@ lean_exe «flecs-test» where
   root := `Main
 
 
-section Flecs
+/-! # Submodule -/
+
+def tryRunProcess {m} [Monad m] [MonadError m] [MonadLiftT IO m] (printCmdOutput : Bool) (sa : IO.Process.SpawnArgs) : m Unit := do
+  let output ← IO.Process.output sa
+  if output.exitCode ≠ 0 then
+    error s!"'{sa.cmd}' returned {output.exitCode}: {output.stderr}"
+  else
+     if printCmdOutput then IO.println output.stdout
+
+def buildSubmodule' {m} [Monad m] [MonadError m] [MonadLiftT IO m] (printCmdOutput : Bool) : m Unit := do
+  if optionGit != "" then
+    tryRunProcess printCmdOutput {
+      cmd := optionGit
+      args := #["submodule", "update", "--init", "--force", "--recursive", "flecs"]
+      cwd := __dir__
+    }
+
+script buildSubmodule do
+  buildSubmodule' true
+  return 0
+
+/-! # Flecs -/
 
 def flecsFlags := #[
   "-DFLECS_CUSTOM_BUILD",
@@ -46,10 +69,8 @@ target flecs.o pkg : FilePath := do
 --   let flecsO ← flecs.o.fetch
 --   buildStaticLib (pkg.nativeLibDir / nameToStaticLib "flecs") #[flecsO]
 
-end Flecs
 
-
-section Bindings
+/-! # Bindings -/
 
 def bindingsSources := #[
   "core/constants",
@@ -90,6 +111,7 @@ def bindingsCFlags (pkg : NPackage _package.name) : FetchM (Array String × Arra
   pure (weakArgs, traceArgs)
 
 extern_lib «flecs-lean» pkg := do
+  buildSubmodule' false
   let name := nameToStaticLib "flecs-lean"
   let (weakArgs, traceArgs) ← bindingsCFlags pkg
   let nativeSrcDir := pkg.dir / "ffi"
@@ -105,5 +127,3 @@ extern_lib «flecs-lean» pkg := do
           optionCompilerBindings
           (pure extraTrace)
       ))
-
-end Bindings
