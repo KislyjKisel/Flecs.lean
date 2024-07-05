@@ -127,7 +127,9 @@ once the entity has been found its handle is passed to `Iter.setInterruptedBy`,
 which is then subsequently returned.
 -/
 @[extern "lean_flecs_World_run"]
-opaque World.run (world : @& World α) (system : Entity) (deltaTime : FTime) (param : @& Dynamic) : BaseIO Entity
+opaque World.run
+  (world : @& World α) (system : Entity)
+  (deltaTime : FTime) (param : @& Dynamic := Flecs.mkEmptyDynamic ()) : BaseIO Entity
 
 /--
 Same as `World.run`, but subdivides entities across number of provided stages.
@@ -135,7 +137,7 @@ Same as `World.run`, but subdivides entities across number of provided stages.
 @[extern "lean_flecs_World_runWorker"]
 opaque World.runWorker
   (world : @& World α) (system : Entity) (stageCurrent stageCount : Int32)
-  (deltaTime : FTime) (param : @& Dynamic) : BaseIO Entity
+  (deltaTime : FTime) (param : @& Dynamic := Flecs.mkEmptyDynamic ()) : BaseIO Entity
 
 /-- System module import function. -/
 @[extern "lean_flecs_World_systemImport"]

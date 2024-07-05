@@ -34,11 +34,19 @@ LEAN_POD_RWBYTES_INST(Flecs_TickSource, EcsTickSource, lean_object*, lean_flecs_
 #define LEAN_FLECS_SystemDesc_multiThreaded U8, 0, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_immediate U8, 1, LEAN_FLECS_SystemDesc_LAYOUT
 
+lean_object* lean_flecs_Dynamic_mk_empty(lean_obj_arg unit_);
+
 static void lean_flecs_system_callback(ecs_iter_t* it) {
     lean_object* callback = it->callback_ctx;
     lean_inc_ref(callback);
     lean_object* param = it->param;
-    lean_inc(param);
+    // Param won't be passed when the system runs automatically
+    if (it->param == NULL) {
+        param = lean_flecs_Dynamic_mk_empty(lean_box(0));
+    }
+    else {
+        lean_inc(param);
+    }
     // Iterator can't be copied because changes to it (e.g. setInterruptedBy) must be visible to the caller.
     lean_dec_ref(lean_apply_3(callback, lean_flecs_Iter_boxP(it), param, lean_box(0)));
 }

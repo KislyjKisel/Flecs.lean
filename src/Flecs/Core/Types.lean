@@ -1,11 +1,12 @@
 import Pod.Meta
 import Pod.Int
+import Pod.Fixnum
 import Pod.Storable
 import Pod.ReadBytes
 import Pod.Instances
 import Flecs.Core.Defines
 
-open Pod (Int16 Int32 Int64 Storable ReadBytes)
+open Pod (Int16 Int32 Int64 UFixnum Storable ReadBytes)
 
 namespace Flecs
 
@@ -66,9 +67,8 @@ deriving Nonempty
 /-- A query. -/
 define_foreign_type Query (groupCtx : Type)
 
--- Unused
--- /-- An observer is a system that is invoked when an event matches its query. -/
--- define_foreign_type Observer
+/-- An observer is a system that is invoked when an event matches its query. -/
+define_foreign_type Observer -- const*
 
 -- Unused
 -- /-- An observable produces events that can be listened for by an observer. -/
@@ -116,9 +116,6 @@ This is the current list of types in the flecs API that can be used as an `Poly`
 
 Functions that accept an `Poly` argument can accept objects of these types.
 If the object does not have the requested mixin the API will throw an assert.
-
-`α` - world context type.
-`β` - query group context type.
 -/
 define_foreign_type Poly (worldCtx groupCtx : Type)
 
@@ -413,6 +410,62 @@ structure QueryDesc (worldCtx groupCtx : Type) where
   groupBy : Option (GroupBy worldCtx groupCtx) := .none
   /-- Entity associated with query (optional). -/
   entity : Entity := 0
+
+inductive EventTarget where
+| entity (entity : Entity)
+| table (table : Table) (offset count : Int32)
+
+/--
+A type with a TypeName instance.
+Used to default initialize Dynamic fields since Init doesn't provide TypeName instances for common types.
+-/
+private inductive Unit' where | mk deriving TypeName
+
+@[export lean_flecs_Dynamic_mk_empty] protected
+def mkEmptyDynamic (_ : Unit) : Dynamic := Dynamic.mk Unit'.mk
+
+/-- Used with `World.emit` -/
+structure EventDesc (worldCtx groupCtx : Type) where
+  /-- The event id. Only observers for the specified event will be notified. -/
+  event : Entity
+  /--
+  Component ids.
+  Only observers with a matching component id will be notified.
+  Observers are guaranteed to get notified once, even if they match more than one id.
+  Leave empty to use defaults (`#[Builtin.Any]`).
+  -/
+  ids : «Type» := #[]
+  /--
+  Passed to matched observers' callbacks.
+  Bindings use `UFixnum` because it seems to be impossible to free the param, thus requiring an unboxed type.
+  -/
+  param : UFixnum := 0
+  /-- Observable (usually the world) -/
+  observable : Option (Poly worldCtx groupCtx) := none
+  /-- Event flags -/
+  flags : Flags32 := 0
+  target : EventTarget
+
+/-- Used with `World.observerInit` -/
+structure ObserverDesc (worldCtx groupCtx : Type) where
+  /-- Existing entity to associate with observer (optional) -/
+  entity : Entity := 0
+  /-- Query for observer -/
+  query : QueryDesc worldCtx groupCtx
+  /-- Events to observe (`OnAdd`, `OnRemove`, `OnSet`) -/
+  events : Array Entity
+  /-- Observer must have at least one event -/
+  events_lt_size : 0 < events.size
+  events_size_lt : events.size < eventDescMax
+  /--
+  When observer is created, generate events from existing data.
+  For example, `OnAdd` `Position` would match all existing instances of `Position`.
+  -/
+  yieldExisting : Bool := false
+  /-- Callback to invoke on an event, invoked when the observer matches. -/
+  callback : Iter worldCtx → (param : UFixnum) → BaseIO Unit
+  /-- Observable with which to register the observer -/
+  observable : Option (Poly worldCtx groupCtx) := none
 
 
 /-! # Miscellaneous types -/

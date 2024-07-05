@@ -6,5 +6,6 @@ import Flecs.Core.Entities
 import Flecs.Core.Ids
 import Flecs.Core.Components
 import Flecs.Core.Queries
+import Flecs.Core.Observers
 import Flecs.Core.Iterators
 import Flecs.Core.Tables

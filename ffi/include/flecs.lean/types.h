@@ -30,6 +30,7 @@ LEAN_POD_PTR_ALIAS(flecs_World, ecs_world_t*)
 LEAN_POD_PTR_ALIAS(flecs_Poly, ecs_poly_t*)
 LEAN_POD_PTR_ALIAS(flecs_Table, ecs_table_t*)
 LEAN_POD_PTR_ALIAS(flecs_Query, ecs_query_t*)
+LEAN_POD_PTR_ALIAS(flecs_Observer, const ecs_observer_t*)
 
 LEAN_POD_DECLARE_EXTERNAL_CLASS(flecs_Iter, ecs_iter_t*)
 
@@ -106,6 +107,29 @@ static inline ecs_table_range_t lean_flecs_TableRange_unbox(b_lean_obj_arg range
 #define LEAN_FLECS_QueryDesc_orderBy BOX, 3, LEAN_FLECS_QueryDesc_LAYOUT
 #define LEAN_FLECS_QueryDesc_groupBy BOX, 4, LEAN_FLECS_QueryDesc_LAYOUT
 #define LEAN_FLECS_QueryDesc_entity U64, 0, LEAN_FLECS_QueryDesc_LAYOUT
+
+#define LEAN_FLECS_EventTarget_entity_LAYOUT 0, 0, 0, 1, 0, 0, 0
+#define LEAN_FLECS_EventTarget_entity_entity U64, 0, LEAN_FLECS_EventTarget_entity_LAYOUT
+#define LEAN_FLECS_EventTarget_table_LAYOUT 1, 3, 0, 0, 0, 0, 0
+#define LEAN_FLECS_EventTarget_table_table BOX, 0, LEAN_FLECS_EventTarget_table_LAYOUT
+#define LEAN_FLECS_EventTarget_table_offset BOX, 1, LEAN_FLECS_EventTarget_table_LAYOUT
+#define LEAN_FLECS_EventTarget_table_count BOX, 2, LEAN_FLECS_EventTarget_table_LAYOUT
+
+#define LEAN_FLECS_EventDesc_LAYOUT 0, 4, 0, 1, 1, 0, 0
+#define LEAN_FLECS_EventDesc_event U64, 0, LEAN_FLECS_EventDesc_LAYOUT
+#define LEAN_FLECS_EventDesc_ids BOX, 0, LEAN_FLECS_EventDesc_LAYOUT
+#define LEAN_FLECS_EventDesc_param BOX, 1, LEAN_FLECS_EventDesc_LAYOUT
+#define LEAN_FLECS_EventDesc_observable BOX, 2, LEAN_FLECS_EventDesc_LAYOUT
+#define LEAN_FLECS_EventDesc_flags U32, 0, LEAN_FLECS_EventDesc_LAYOUT
+#define LEAN_FLECS_EventDesc_target BOX, 3, LEAN_FLECS_EventDesc_LAYOUT
+
+#define LEAN_FLECS_ObserverDesc_LAYOUT 0, 4, 0, 1, 0, 0, 1
+#define LEAN_FLECS_ObserverDesc_entity U64, 0, LEAN_FLECS_ObserverDesc_LAYOUT
+#define LEAN_FLECS_ObserverDesc_query BOX, 0, LEAN_FLECS_ObserverDesc_LAYOUT
+#define LEAN_FLECS_ObserverDesc_events BOX, 1, LEAN_FLECS_ObserverDesc_LAYOUT
+#define LEAN_FLECS_ObserverDesc_yieldExisting U8, 0, LEAN_FLECS_ObserverDesc_LAYOUT
+#define LEAN_FLECS_ObserverDesc_callback BOX, 2, LEAN_FLECS_ObserverDesc_LAYOUT
+#define LEAN_FLECS_ObserverDesc_observable BOX, 3, LEAN_FLECS_ObserverDesc_LAYOUT
 
 
 // Miscellaneous types
