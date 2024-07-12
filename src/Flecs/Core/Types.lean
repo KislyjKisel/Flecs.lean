@@ -32,16 +32,9 @@ Ids are the things that can be added to an entity.
 An id can be an entity or pair, and can have optional id flags.
 -/
 def Id := UInt64
+deriving Repr, Inhabited, AndOp, OrOp, BEq, Ord, ToString, Storable
 
-instance : Inhabited Id := inferInstanceAs (Inhabited UInt64)
-instance : AndOp Id := inferInstanceAs (AndOp UInt64)
-instance : OrOp Id := inferInstanceAs (OrOp UInt64)
-instance : BEq Id := inferInstanceAs (BEq UInt64)
-instance : Ord Id := inferInstanceAs (Ord UInt64)
 instance : OfNat Id 0 := inferInstanceAs (OfNat UInt64 0)
-instance : Repr Id := inferInstanceAs (Repr UInt64)
-instance : ToString Id := inferInstanceAs (ToString UInt64)
-instance : Storable Id := inferInstanceAs (Storable UInt64)
 instance : ReadBytes Id := inferInstanceAs (ReadBytes UInt64)
 
 abbrev Entity := Id
