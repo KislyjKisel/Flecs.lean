@@ -387,7 +387,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Entity_exists(lean_flecs_World world, lean_f
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Entity_setGeneration(lean_flecs_World world, lean_flecs_Entity entity, lean_obj_arg io_) {
-    ecs_set_generation(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
+    ecs_set_version(lean_flecs_World_fromRepr(world), lean_flecs_Entity_fromRepr(entity));
     return lean_io_result_mk_ok(lean_box(0));
 }
 
