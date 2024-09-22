@@ -389,8 +389,8 @@ like for external pools, savefiles or netcode.
 This operation is similar to `World.makeAlive`, except that it will also
 override the generation of an alive entity.
 -/
-@[extern "lean_flecs_Entity_setGeneration"]
-opaque Entity.setGeneration (world : @& World α) (entity : Entity) : BaseIO Unit
+@[extern "lean_flecs_Entity_setVersion"]
+opaque Entity.setVersion (world : @& World α) (entity : Entity) : BaseIO Unit
 
 
 /-! # Information -/
