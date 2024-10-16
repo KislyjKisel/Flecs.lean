@@ -51,10 +51,6 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_count(lean_flecs_Iter it, lean_obj_arg 
     return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->count));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_Iter_instanceCount(lean_flecs_Iter it, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->instance_count));
-}
-
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_flags(lean_flecs_Iter it, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->flags));
 }

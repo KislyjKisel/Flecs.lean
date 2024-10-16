@@ -119,10 +119,6 @@ opaque Iter.offset (it : @& Iter α) : BaseIO Int32
 @[extern "lean_flecs_Iter_count"]
 opaque Iter.count (it : @& Iter α) : BaseIO Int32
 
-/-- Number of entities to iterate before next table -/
-@[extern "lean_flecs_Iter_instanceCount"]
-opaque Iter.instanceCount (it : @& Iter α) : BaseIO Int32
-
 @[extern "lean_flecs_Iter_flags"]
 opaque Iter.flags (it : @& Iter α) : BaseIO IterFlags
 
