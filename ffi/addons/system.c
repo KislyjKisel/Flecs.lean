@@ -9,26 +9,26 @@ static_assert(sizeof(EcsTickSource) == 8 && ECS_ALIGNOF(EcsTickSource) == 4); //
 #endif
 
 static inline lean_obj_res lean_flecs_TickSource_box(EcsTickSource tickSource) {
-    lean_object* obj = lean_alloc_ctor(0, 1, 1);
-    lean_ctor_set_uint8(obj, sizeof(lean_object*), tickSource.tick);
-    lean_ctor_set(obj, 0, lean_flecs_FTime_box(tickSource.time_elapsed));
+    lean_object* obj = lean_alloc_ctor(0, 0, 4 + 1);
+    lean_ctor_set_uint8(obj, 4, tickSource.tick);
+    lean_ctor_set_float32(obj, 0, tickSource.time_elapsed);
     return obj;
 }
 
 static inline EcsTickSource lean_flecs_TickSource_fromRepr(b_lean_obj_arg obj) {
     return (EcsTickSource){
-        .tick = lean_ctor_get_uint8(obj, sizeof(lean_object*)),
-        .time_elapsed = lean_flecs_FTime_unbox(lean_ctor_get(obj, 0)),
+        .tick = lean_ctor_get_uint8(obj, 4),
+        .time_elapsed = lean_ctor_get_float32(obj, 0),
     };
 }
 
 LEAN_POD_RWBYTES_INST(Flecs_TickSource, EcsTickSource, lean_object*, lean_flecs_TickSource_box, lean_flecs_TickSource_box, lean_flecs_TickSource_fromRepr) 
 
-#define LEAN_FLECS_SystemDesc_LAYOUT 0, 4, 0, 2, 0, 0, 2
+#define LEAN_FLECS_SystemDesc_LAYOUT 0, 3, 0, 2, 1, 0, 2
 #define LEAN_FLECS_SystemDesc_entity U64, 0, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_query BOX, 0, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_callback BOX, 1, LEAN_FLECS_SystemDesc_LAYOUT
-#define LEAN_FLECS_SystemDesc_interval BOX, 2, LEAN_FLECS_SystemDesc_LAYOUT
+#define LEAN_FLECS_SystemDesc_interval F32, 0, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_rate BOX, 3, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_tickSource U64, 1, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_multiThreaded U8, 0, LEAN_FLECS_SystemDesc_LAYOUT
@@ -62,7 +62,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_systemInit(lean_flecs_World world, b_l
     desc_c.callback = lean_flecs_system_callback;
     desc_c.callback_ctx = callback;
     desc_c.callback_ctx_free = lean_flecs_obj_ctx_free;
-    desc_c.interval = lean_pod_Float32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_SystemDesc_interval));
+    desc_c.interval = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_SystemDesc_interval);
     desc_c.rate = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_SystemDesc_rate));
     desc_c.tick_source = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_SystemDesc_tickSource);
     desc_c.multi_threaded = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_SystemDesc_multiThreaded);

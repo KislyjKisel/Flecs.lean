@@ -2,18 +2,18 @@
 #include <flecs.h>
 #include <flecs.lean/types.h>
 
-#define LEAN_FLECS_AppDesc_LAYOUT 0, 4, 0, 0, 0, 1, 2
-#define LEAN_FLECS_AppDesc_targetFps BOX, 0, LEAN_FLECS_AppDesc_LAYOUT
-#define LEAN_FLECS_AppDesc_deltaTime BOX, 1, LEAN_FLECS_AppDesc_LAYOUT
+#define LEAN_FLECS_AppDesc_LAYOUT 0, 2, 0, 0, 2, 1, 2
+#define LEAN_FLECS_AppDesc_targetFps F32, 0, LEAN_FLECS_AppDesc_LAYOUT
+#define LEAN_FLECS_AppDesc_deltaTime F32, 1, LEAN_FLECS_AppDesc_LAYOUT
 #define LEAN_FLECS_AppDesc_threads BOX, 0, LEAN_FLECS_AppDesc_LAYOUT
 #define LEAN_FLECS_AppDesc_frames BOX, 1, LEAN_FLECS_AppDesc_LAYOUT
 #define LEAN_FLECS_AppDesc_enableRest U8, 0, LEAN_FLECS_AppDesc_LAYOUT
 #define LEAN_FLECS_AppDesc_enableStats U8, 1, LEAN_FLECS_AppDesc_LAYOUT
 #define LEAN_FLECS_AppDesc_port U16, 0, LEAN_FLECS_AppDesc_LAYOUT
 
-#define LEAN_FLECS_AppDescX_LAYOUT 0, 7, 0, 0, 0, 1, 2
-#define LEAN_FLECS_AppDescX_targetFps BOX, 0, LEAN_FLECS_AppDescX_LAYOUT
-#define LEAN_FLECS_AppDescX_deltaTime BOX, 1, LEAN_FLECS_AppDescX_LAYOUT
+#define LEAN_FLECS_AppDescX_LAYOUT 0, 5, 0, 0, 2, 1, 2
+#define LEAN_FLECS_AppDescX_targetFps F32, 0, LEAN_FLECS_AppDescX_LAYOUT
+#define LEAN_FLECS_AppDescX_deltaTime F32, 1, LEAN_FLECS_AppDescX_LAYOUT
 #define LEAN_FLECS_AppDescX_threads BOX, 0, LEAN_FLECS_AppDescX_LAYOUT
 #define LEAN_FLECS_AppDescX_frames BOX, 1, LEAN_FLECS_AppDescX_LAYOUT
 #define LEAN_FLECS_AppDescX_enableRest U8, 0, LEAN_FLECS_AppDescX_LAYOUT
@@ -58,8 +58,8 @@ static int lean_flecs_AppFrameAction_wrapper(ecs_world_t* world, const ecs_app_d
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_appRun(lean_flecs_World world, lean_obj_arg desc, lean_obj_arg io_) {
     ecs_app_desc_t desc_c = {};
-    desc_c.target_fps = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_targetFps));
-    desc_c.delta_time = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_deltaTime));
+    desc_c.target_fps = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_targetFps);
+    desc_c.delta_time = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_deltaTime);
     desc_c.threads = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_threads));
     desc_c.frames = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_frames));
     desc_c.enable_rest = 0 != LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_enableRest);
@@ -77,8 +77,8 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_appRun(lean_flecs_World world, lean_ob
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_appRunFrame(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
     ecs_app_desc_t desc_c = {};
-    desc_c.target_fps = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_targetFps));
-    desc_c.delta_time = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_deltaTime));
+    desc_c.target_fps = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_targetFps);
+    desc_c.delta_time = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_deltaTime);
     desc_c.threads = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_threads));
     desc_c.frames = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_frames));
     desc_c.enable_rest = 0 != LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_enableRest);

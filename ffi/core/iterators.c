@@ -28,7 +28,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_eventCur(lean_flecs_Iter it, lean_obj_a
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_variableCount(lean_flecs_Iter it, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->variable_count));
+    return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->variable_count));
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_deltaTime(lean_flecs_Iter it, lean_obj_arg io_) {
@@ -48,7 +48,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_offset(lean_flecs_Iter it, lean_obj_arg
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_count(lean_flecs_Iter it, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_pod_Int32_box(lean_flecs_Iter_fromRepr(it)->count));
+    return lean_io_result_mk_ok(lean_box_uint32(lean_flecs_Iter_fromRepr(it)->count));
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_flags(lean_flecs_Iter it, lean_obj_arg io_) {

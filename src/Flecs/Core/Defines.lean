@@ -6,7 +6,7 @@ def versionPatch := 12
 def version := s!"{versionMajor}.{versionMinor}.{versionPatch}"
 
 /-- Customizable precision for floating point operations. -/
-abbrev FloatX := Float
+abbrev FloatX := Float32
 
 /-- Customizable precision for scalar time values -/
 abbrev FTime := FloatX

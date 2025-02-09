@@ -96,7 +96,7 @@ opaque Iter.eventCur (it : @& Iter α) : BaseIO Int32
 
 /-- Number of variables for query -/
 @[extern "lean_flecs_Iter_variableCount"]
-opaque Iter.variableCount (it : @& Iter α) : BaseIO Int32
+opaque Iter.variableCount (it : @& Iter α) : BaseIO UInt32
 
 /-- Time elapsed since last frame -/
 @[extern "lean_flecs_Iter_deltaTime"]
@@ -116,7 +116,7 @@ opaque Iter.offset (it : @& Iter α) : BaseIO Int32
 
 /-- Number of entities to iterate (getter) -/
 @[extern "lean_flecs_Iter_count"]
-opaque Iter.count (it : @& Iter α) : BaseIO Int32
+opaque Iter.count (it : @& Iter α) : BaseIO UInt32
 
 @[extern "lean_flecs_Iter_flags"]
 opaque Iter.flags (it : @& Iter α) : BaseIO IterFlags
@@ -164,7 +164,7 @@ To determine the number of matched entities,
 the operation iterates the iterator until it yields no more results.
 -/
 @[extern "lean_flecs_Iter_count_f"]
-opaque Iter.count' (it : @& Iter α) : BaseIO Int32
+opaque Iter.count' (it : @& Iter α) : BaseIO UInt32
 
 /--
 Test if iterator is true.
@@ -339,7 +339,7 @@ This operation returns whether the field is matched on the currently iterated en
 This function will return false when the field is owned by another entity, such as a parent or a prefab.
 
 When this operation returns false, the field must be accessed as a single value instead of an array.
-Fields for which this operation returns true return arrays with it->count values.
+Fields for which this operation returns true return arrays with `it.count` values.
 -/
 @[extern "lean_flecs_Iter_fieldIsSelf"]
 opaque Iter.fieldIsSelf (it : @& Iter α) (index : Int32) : BaseIO Bool

@@ -2,11 +2,11 @@
 #include <flecs.h>
 #include <flecs.lean/types.h>
 
-#define LEAN_FLECS_Timer_LAYOUT 0, 4, 0, 0, 0, 0, 2
-#define LEAN_FLECS_Timer_timeout BOX, 0, LEAN_FLECS_Timer_LAYOUT
-#define LEAN_FLECS_Timer_time BOX, 1, LEAN_FLECS_Timer_LAYOUT
-#define LEAN_FLECS_Timer_overshoot BOX, 2, LEAN_FLECS_Timer_LAYOUT
-#define LEAN_FLECS_Timer_firedCount BOX, 3, LEAN_FLECS_Timer_LAYOUT
+#define LEAN_FLECS_Timer_LAYOUT 0, 1, 0, 0, 3, 0, 2
+#define LEAN_FLECS_Timer_timeout F32, 0, LEAN_FLECS_Timer_LAYOUT
+#define LEAN_FLECS_Timer_time F32, 1, LEAN_FLECS_Timer_LAYOUT
+#define LEAN_FLECS_Timer_overshoot F32, 2, LEAN_FLECS_Timer_LAYOUT
+#define LEAN_FLECS_Timer_firedCount BOX, 0, LEAN_FLECS_Timer_LAYOUT
 #define LEAN_FLECS_Timer_active U8, 0, LEAN_FLECS_Timer_LAYOUT
 #define LEAN_FLECS_Timer_singleShot U8, 1, LEAN_FLECS_Timer_LAYOUT
 
@@ -16,9 +16,9 @@ static_assert(sizeof(EcsTimer) == 20 && ECS_ALIGNOF(EcsTimer) == 4); // Storable
 
 static inline lean_obj_res lean_flecs_Timer_box(EcsTimer timer) {
     lean_object* obj = LEAN_POD_ALLOC_CTOR(LEAN_FLECS_Timer_LAYOUT);
-    LEAN_POD_CTOR_SET(obj, lean_flecs_FTime_box(timer.timeout), LEAN_FLECS_Timer_timeout);
-    LEAN_POD_CTOR_SET(obj, lean_flecs_FTime_box(timer.time), LEAN_FLECS_Timer_time);
-    LEAN_POD_CTOR_SET(obj, lean_flecs_FTime_box(timer.overshoot), LEAN_FLECS_Timer_overshoot);
+    LEAN_POD_CTOR_SET(obj, timer.timeout, LEAN_FLECS_Timer_timeout);
+    LEAN_POD_CTOR_SET(obj, timer.time, LEAN_FLECS_Timer_time);
+    LEAN_POD_CTOR_SET(obj, timer.overshoot, LEAN_FLECS_Timer_overshoot);
     LEAN_POD_CTOR_SET(obj, lean_pod_Int32_box(timer.fired_count), LEAN_FLECS_Timer_firedCount);
     LEAN_POD_CTOR_SET(obj, timer.active, LEAN_FLECS_Timer_active);
     LEAN_POD_CTOR_SET(obj, timer.single_shot, LEAN_FLECS_Timer_singleShot);
@@ -27,9 +27,9 @@ static inline lean_obj_res lean_flecs_Timer_box(EcsTimer timer) {
 
 static inline EcsTimer lean_flecs_Timer_fromRepr(b_lean_obj_arg obj) {
     return (EcsTimer){
-        .timeout = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_timeout)),
-        .time = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_time)),
-        .overshoot = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_overshoot)),
+        .timeout = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_timeout),
+        .time = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_time),
+        .overshoot = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_overshoot),
         .fired_count = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_firedCount)),
         .active = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_active),
         .single_shot = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_Timer_singleShot),
@@ -38,11 +38,11 @@ static inline EcsTimer lean_flecs_Timer_fromRepr(b_lean_obj_arg obj) {
 
 LEAN_POD_RWBYTES_INST(Flecs_Timer, EcsTimer, lean_object*, lean_flecs_Timer_box, lean_flecs_Timer_box, lean_flecs_Timer_fromRepr)
 
-#define LEAN_FLECS_RateFilter_LAYOUT 0, 3, 0, 1, 0, 0, 0
+#define LEAN_FLECS_RateFilter_LAYOUT 0, 2, 0, 1, 1, 0, 0
 #define LEAN_FLECS_RateFilter_src U64, 0, LEAN_FLECS_RateFilter_LAYOUT
 #define LEAN_FLECS_RateFilter_rate BOX, 0, LEAN_FLECS_RateFilter_LAYOUT
 #define LEAN_FLECS_RateFilter_tickCount BOX, 1, LEAN_FLECS_RateFilter_LAYOUT
-#define LEAN_FLECS_RateFilter_timeElapsed BOX, 2, LEAN_FLECS_RateFilter_LAYOUT
+#define LEAN_FLECS_RateFilter_timeElapsed F32, 0, LEAN_FLECS_RateFilter_LAYOUT
 
 #ifdef static_assert
 static_assert(sizeof(EcsRateFilter) == 24 && ECS_ALIGNOF(EcsRateFilter) == 8); // Storable RateFilter
@@ -53,7 +53,7 @@ static inline lean_obj_res lean_flecs_RateFilter_box(EcsRateFilter rateFilter) {
     LEAN_POD_CTOR_SET(obj, rateFilter.src, LEAN_FLECS_RateFilter_src);
     LEAN_POD_CTOR_SET(obj, lean_pod_Int32_box(rateFilter.rate), LEAN_FLECS_RateFilter_rate);
     LEAN_POD_CTOR_SET(obj, lean_pod_Int32_box(rateFilter.tick_count), LEAN_FLECS_RateFilter_tickCount);
-    LEAN_POD_CTOR_SET(obj, lean_flecs_FTime_box(rateFilter.time_elapsed), LEAN_FLECS_RateFilter_timeElapsed);
+    LEAN_POD_CTOR_SET(obj, rateFilter.time_elapsed, LEAN_FLECS_RateFilter_timeElapsed);
     return obj;
 }
 
@@ -62,7 +62,7 @@ static inline EcsRateFilter lean_flecs_RateFilter_fromRepr(b_lean_obj_arg obj) {
         .src = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_RateFilter_src),
         .rate = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(obj, LEAN_FLECS_RateFilter_rate)),
         .tick_count = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(obj, LEAN_FLECS_RateFilter_tickCount)),
-        .time_elapsed = lean_flecs_FTime_unbox(LEAN_POD_CTOR_GET(obj, LEAN_FLECS_RateFilter_timeElapsed))
+        .time_elapsed = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_RateFilter_timeElapsed),
     };
 }
 
