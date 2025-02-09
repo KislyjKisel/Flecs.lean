@@ -51,7 +51,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Query_varIsEntity (lean_flecs_Query query, l
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_Query_iter (lean_flecs_World world, lean_flecs_Query query, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_flecs_Iter_box(
+    return lean_io_result_mk_ok(lean_flecs_Iter_alloc_value(
         ecs_query_iter(lean_flecs_World_fromRepr(world), lean_flecs_Query_fromRepr(query))
     ));
 }
@@ -63,7 +63,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_queryNext (lean_flecs_Iter it, lean_obj
 LEAN_EXPORT lean_obj_res lean_flecs_Query_has(lean_flecs_Query query, lean_flecs_Entity entity, lean_obj_arg io_) {
     ecs_iter_t it = {};
     if (ecs_query_has(lean_flecs_Query_fromRepr(query), lean_flecs_Entity_fromRepr(entity), &it)) {
-        return lean_io_result_mk_ok(lean_mk_option_some(lean_flecs_Iter_box(it)));
+        return lean_io_result_mk_ok(lean_mk_option_some(lean_flecs_Iter_alloc_value(it)));
     }
     return lean_io_result_mk_ok(lean_mk_option_none());
 }
@@ -71,7 +71,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Query_has(lean_flecs_Query query, lean_flecs
 LEAN_EXPORT lean_obj_res lean_flecs_Query_hasTable(lean_flecs_Query query, lean_flecs_Table table, lean_obj_arg io_) {
     ecs_iter_t it = {};
     if (ecs_query_has_table(lean_flecs_Query_fromRepr(query), lean_flecs_Table_fromRepr(table), &it)) {
-        return lean_io_result_mk_ok(lean_mk_option_some(lean_flecs_Iter_box(it)));
+        return lean_io_result_mk_ok(lean_mk_option_some(lean_flecs_Iter_alloc_value(it)));
     }
     return lean_io_result_mk_ok(lean_mk_option_none());
 }
@@ -80,7 +80,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_Query_hasRange(lean_flecs_Query query, b_lea
     ecs_iter_t it = {};
     ecs_table_range_t range_c = lean_flecs_TableRange_fromRepr(range);
     if (ecs_query_has_range(lean_flecs_Query_fromRepr(query), &range_c, &it)) {
-        return lean_io_result_mk_ok(lean_mk_option_some(lean_flecs_Iter_box(it)));
+        return lean_io_result_mk_ok(lean_mk_option_some(lean_flecs_Iter_alloc_value(it)));
     }
     return lean_io_result_mk_ok(lean_mk_option_none());
 }

@@ -32,19 +32,41 @@ LEAN_POD_PTR_ALIAS(flecs_Table, ecs_table_t*)
 LEAN_POD_PTR_ALIAS(flecs_Query, ecs_query_t*)
 LEAN_POD_PTR_ALIAS(flecs_Observer, const ecs_observer_t*)
 
-LEAN_POD_DECLARE_EXTERNAL_CLASS(flecs_Iter, ecs_iter_t*)
+typedef struct {
+    bool owned;
+    union {
+        ecs_iter_t* pointer;
+        ecs_iter_t value;
+    };
+} lean_flecs_Iter_data;
 
-static inline lean_object* lean_flecs_Iter_box(ecs_iter_t it) {
-    ecs_iter_t* it_box = lean_pod_alloc(sizeof(ecs_iter_t));
-    *it_box = it;
+typedef lean_object* lean_flecs_Iter;
+extern lean_external_class* lean_flecs_Iter_class;
+
+static inline ecs_iter_t* lean_flecs_Iter_fromRepr(b_lean_obj_arg obj) {
+    lean_flecs_Iter_data* data = lean_get_external_data(obj);
+    if (data->owned) {
+        return &data->value;
+    }
+    else {
+        return data->pointer;
+    }
+}
+
+static inline lean_object* lean_flecs_Iter_alloc_value(ecs_iter_t it) {
+    lean_flecs_Iter_data* it_box = lean_pod_alloc(sizeof(lean_flecs_Iter_data));
+    it_box->value = it;
+    it_box->owned = true;
     return lean_alloc_external(lean_flecs_Iter_class, it_box);
 }
 
-static inline lean_object* lean_flecs_Iter_boxP(ecs_iter_t* it) {
-    return lean_alloc_external(lean_flecs_Iter_class, it);
+static inline lean_object* lean_flecs_Iter_alloc_pointer(ecs_iter_t* it) {
+    lean_flecs_Iter_data* it_box = lean_pod_alloc(sizeof(lean_flecs_Iter_data));
+    it_box->pointer = it;
+    it_box->owned = false;
+    return lean_alloc_external(lean_flecs_Iter_class, it_box);
 }
 
-#define lean_flecs_Iter_toRepr lean_flecs_Iter_box
 
 LEAN_POD_DECLARE_EXTERNAL_CLASS(flecs_Ref, ecs_ref_t*)
 

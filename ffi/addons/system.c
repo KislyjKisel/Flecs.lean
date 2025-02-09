@@ -48,7 +48,7 @@ static void lean_flecs_system_callback(ecs_iter_t* it) {
         lean_inc(param);
     }
     // Iterator can't be copied because changes to it (e.g. setInterruptedBy) must be visible to the caller.
-    lean_dec_ref(lean_apply_3(callback, lean_flecs_Iter_boxP(it), param, lean_box(0)));
+    lean_dec_ref(lean_apply_3(callback, lean_flecs_Iter_alloc_pointer(it), param, lean_box(0)));
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_systemInit(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
