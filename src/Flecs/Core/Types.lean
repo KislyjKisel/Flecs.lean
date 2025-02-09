@@ -391,7 +391,7 @@ structure GroupBy (worldCtx groupCtx : Type) where
 structure QueryDesc (worldCtx groupCtx : Type) where
   /-- Query terms -/
   terms : Array Term := #[]
-  terms_size_lt : terms.size < termCountMax := by decide
+  terms_size_lt : terms.size < termCountMax := by simp; decide
   /-- Query DSL expression -/
   expr : Option String := none
   /-- Caching policy of query. -/
