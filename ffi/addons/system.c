@@ -29,7 +29,7 @@ LEAN_POD_RWBYTES_INST(Flecs_TickSource, EcsTickSource, lean_object*, lean_flecs_
 #define LEAN_FLECS_SystemDesc_query BOX, 0, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_callback BOX, 1, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_interval F32, 0, LEAN_FLECS_SystemDesc_LAYOUT
-#define LEAN_FLECS_SystemDesc_rate BOX, 3, LEAN_FLECS_SystemDesc_LAYOUT
+#define LEAN_FLECS_SystemDesc_rate BOX, 2, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_tickSource U64, 1, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_multiThreaded U8, 0, LEAN_FLECS_SystemDesc_LAYOUT
 #define LEAN_FLECS_SystemDesc_immediate U8, 1, LEAN_FLECS_SystemDesc_LAYOUT
