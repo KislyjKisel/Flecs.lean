@@ -243,14 +243,6 @@ LEAN_EXPORT lean_flecs_Entity lean_flecs_c_onTableDelete(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsOnTableDelete);
 }
 
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_onTableEmpty(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsOnTableEmpty);
-}
-
-LEAN_EXPORT lean_flecs_Entity lean_flecs_c_onTableFill(lean_obj_arg unit) {
-  return lean_flecs_Entity_toRepr(EcsOnTableFill);
-}
-
 LEAN_EXPORT lean_flecs_Entity lean_flecs_c_onDelete(lean_obj_arg unit) {
   return lean_flecs_Entity_toRepr(EcsOnDelete);
 }

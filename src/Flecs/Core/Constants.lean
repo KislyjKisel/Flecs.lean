@@ -218,12 +218,6 @@ define_foreign_constant onTableCreate : Entity := "lean_flecs_c_onTableCreate"
 /-- Event that triggers when a table is deleted. -/
 define_foreign_constant onTableDelete : Entity := "lean_flecs_c_onTableDelete"
 
-/-- Event that triggers when a table becomes empty (doesn't emit on creation). -/
-define_foreign_constant onTableEmpty : Entity := "lean_flecs_c_onTableEmpty"
-
-/-- Event that triggers when a table becomes non-empty. -/
-define_foreign_constant onTableFill : Entity := "lean_flecs_c_onTableFill"
-
 /-- Relationship used for specifying cleanup behavior. -/
 define_foreign_constant onDelete : Entity := "lean_flecs_c_onDelete"
 

@@ -1,7 +1,4 @@
-import Pod.Int
 import Flecs.Core.Types
-
-open Pod (Int32)
 
 namespace Flecs
 

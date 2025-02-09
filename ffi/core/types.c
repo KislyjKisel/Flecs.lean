@@ -170,10 +170,6 @@ LEAN_EXPORT lean_obj_res lean_flecs_WorldInfo_tableCount(lean_flecs_WorldInfo wi
     return lean_io_result_mk_ok(lean_box_uint32((uint32_t)lean_flecs_WorldInfo_fromRepr(wi)->table_count));
 }
 
-LEAN_EXPORT lean_obj_res lean_flecs_WorldInfo_emptyTableCount(lean_flecs_WorldInfo wi, lean_obj_arg io_) {
-    return lean_io_result_mk_ok(lean_box_uint32((uint32_t)lean_flecs_WorldInfo_fromRepr(wi)->empty_table_count));
-}
-
 LEAN_EXPORT lean_obj_res lean_flecs_QueryGroupInfo_matchCount(lean_flecs_QueryGroupInfo qgi, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_box_uint32((uint32_t)lean_flecs_QueryGroupInfo_fromRepr(qgi)->match_count));
 }
@@ -184,4 +180,12 @@ LEAN_EXPORT lean_obj_res lean_flecs_QueryGroupInfo_tableCount(lean_flecs_QueryGr
 
 LEAN_EXPORT lean_obj_res lean_flecs_QueryGroupInfo_ctx(lean_flecs_QueryGroupInfo qgi, lean_obj_arg io_) {
     return lean_io_result_mk_ok((lean_object*)lean_flecs_QueryGroupInfo_fromRepr(qgi)->ctx);
+}
+
+LEAN_EXPORT uint32_t lean_flecs_AperiodicActionFlags_emptyQueries(lean_obj_arg unit) {
+  return EcsAperiodicEmptyQueries;
+}
+
+LEAN_EXPORT uint32_t lean_flecs_AperiodicActionFlags_componentMonitors(lean_obj_arg unit) {
+  return EcsAperiodicComponentMonitors;
 }

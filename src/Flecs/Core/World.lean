@@ -1,8 +1,5 @@
-import Pod.Int
 import Flecs.Core.Defines
 import Flecs.Core.Types
-
-open Pod (Int32)
 
 namespace Flecs
 
@@ -324,15 +321,19 @@ opaque World.getMaxId (world : @& World α) : BaseIO Entity
 
 /-- Force aperiodic actions. -/
 @[extern "lean_flecs_runAperiodic"]
-opaque World.runAperiodic (world : @& World α) (flags : Flags32) : BaseIO Unit
+opaque World.runAperiodic (world : @& World α) (flags : AperiodicActionFlags) : BaseIO Unit
 
-/-- Cleanup empty tables. -/
+/--
+Cleanup empty tables.
+
+The generation specifies the minimum number of times this operation has
+to be called before an empty table is cleaned up.
+If a table becomes non empty, the generation is reset.
+
+By specifying a non-zero id the cleanup logic can be limited to tables with a specific (component) id.
+-/
 @[extern "lean_flecs_deleteEmptyTables"]
-opaque World.deleteEmptyTables
-  (world : @& World α) (id : Id)
-  (clearGeneration : UInt16) (deleteGeneration : UInt16)
-  (minIdCount : Int32) (timeBudgetSeconds : Float)
-  : BaseIO Int32
+opaque World.deleteEmptyTables (world : @& World α) (desc : @& DeleteEmptyTablesDesc) : BaseIO Int32
 
 -- TODO: getWorld (const pointer)
 -- /-- Get world from poly. -/

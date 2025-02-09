@@ -1,10 +1,9 @@
 import Pod.Meta
-import Pod.Int
 import Pod.Instances
 import Flecs.Core.Types
 import Flecs.Core.Constants
 
-open Pod (Int32 Int64 Storable)
+open Pod (Storable)
 
 namespace Flecs
 

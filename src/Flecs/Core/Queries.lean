@@ -1,7 +1,4 @@
-import Pod.Int
 import Flecs.Core.Types
-
-open Pod (Int32)
 
 namespace Flecs
 
@@ -209,7 +206,7 @@ structure QueryCount where
   tables : Int32
   /-- Number of empty tables returned by query. -/
   emptyTables : Int32
-deriving Repr, Inhabited
+deriving Inhabited
 
 /--
 Returns number of entities and results the query matches with.

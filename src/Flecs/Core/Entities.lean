@@ -1,9 +1,8 @@
-import Pod.Int
 import Pod.ReadBytes
 import Pod.WriteBytes
 import Flecs.Core.Types
 
-open Pod (Int32 Storable ReadBytes WriteBytes)
+open Pod (Storable ReadBytes WriteBytes)
 
 namespace Flecs
 

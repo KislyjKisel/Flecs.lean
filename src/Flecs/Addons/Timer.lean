@@ -1,9 +1,8 @@
-import Pod.Int
 import Pod.Instances
 import Flecs.Core.Types
 import Flecs.Core.Constants
 
-open Pod (Int32 Storable)
+open Pod (Storable)
 
 namespace Flecs
 
@@ -23,7 +22,7 @@ structure Timer where
   active : Bool
   /-- Is this a single shot timer -/
   singleShot : Bool
-deriving Repr, Inhabited
+deriving Inhabited
 
 @[inherit_doc Builtin.timer]
 abbrev Timer.id : Entity := Builtin.timer
@@ -45,7 +44,7 @@ structure RateFilter where
   tickCount : Int32
   /-- Time elapsed since last tick -/
   timeElapsed : FTime
-deriving Repr, Inhabited
+deriving Inhabited
 
 @[inherit_doc Builtin.rateFilter]
 abbrev RateFilter.id : Entity := Builtin.rateFilter

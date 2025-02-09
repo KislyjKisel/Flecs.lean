@@ -11,7 +11,7 @@ def optionCompilerBindings := (get_config? bindings_cc).getD "cc"
 def optionFlagsCompileFlecs := splitArgStr $ (get_config? flecs_cflags).getD ""
 def optionFlagsCompileBindings := splitArgStr $ (get_config? bindings_cflags).getD ""
 
-require pod from git "https://github.com/KislyjKisel/lean-pod" @ "a24edfe"
+require pod from git "https://github.com/KislyjKisel/lean-pod" @ "adfbcd4"
 
 package flecs where
   srcDir := "src"
@@ -58,9 +58,9 @@ def flecsFlags := #[
   "-DFLECS_APP"
 ]
 
-target flecs.o pkg : FilePath := do
-  let oFile := pkg.buildDir / "c" / "flecs.o"
-  let srcJob ← inputTextFile <| pkg.dir / "flecs" / "flecs.c"
+target flecs.o pkg : System.FilePath := do
+  let oFile := pkg.buildDir / "ffi" / "flecs.o"
+  let srcJob ← inputTextFile <| pkg.dir / "flecs" / "distr" / "flecs.c"
   buildO oFile srcJob #[]
     (optionFlagsCompileFlecs.push "-fPIC" |>.append flecsFlags)
     optionCompilerFlecs
@@ -100,13 +100,13 @@ def bindingsCFlags (pkg : NPackage _package.name) : FetchM (Array String × Arra
   let mut weakArgs := #["-I", (← getLeanIncludeDir).toString]
   let mut traceArgs := optionFlagsCompileBindings.append #[
     "-fPIC",
-    "-I", (pkg.dir / "flecs").toString,
+    "-I", (pkg.dir / "flecs" / "distr").toString,
     "-I", (pkg.dir / "ffi" / "include").toString
   ] |>.append flecsFlags
 
-  match pkg.deps.find? λ dep ↦ dep.name == `pod with
+  match ← findPackage? `pod with
     | none => error "Missing dependency 'Pod'"
-    | some pod => weakArgs := weakArgs ++ #["-I", (pod.dir / "src" / "native" / "include").toString]
+    | some pod => weakArgs := weakArgs ++ #["-I", (pod.dir / "ffi" / "include").toString]
 
   pure (weakArgs, traceArgs)
 
@@ -115,7 +115,7 @@ extern_lib «flecs-lean» pkg := do
   let name := nameToStaticLib "flecs-lean"
   let (weakArgs, traceArgs) ← bindingsCFlags pkg
   let nativeSrcDir := pkg.dir / "ffi"
-  let objectFileDir := pkg.irDir / "ffi"
+  let objectFileDir := pkg.buildDir / "ffi"
   let extraTrace ← mixTraceArray <$> (bindingsExtras.mapM $ λ h ↦ computeTrace (pkg.dir / ⟨h⟩))
   buildStaticLib (pkg.nativeLibDir / name)
     (#[(← flecs.o.fetch)].append

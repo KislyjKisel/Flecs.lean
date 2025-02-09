@@ -248,16 +248,12 @@ LEAN_EXPORT lean_obj_res lean_flecs_runAperiodic(lean_flecs_World world, uint32_
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_deleteEmptyTables(
-    lean_flecs_World world, lean_flecs_Id id, uint16_t clearGeneration, uint16_t deleteGeneration,
-    uint32_t minIdCount, double timeBudgetSeconds, lean_obj_arg io_
+    lean_flecs_World world, b_lean_obj_arg desc
 ) {
+    ecs_delete_empty_tables_desc_t desc_c = lean_flecs_DeleteEmptyTablesDesc_fromRepr(desc);
     return lean_io_result_mk_ok(lean_box_uint32(ecs_delete_empty_tables(
         lean_flecs_World_fromRepr(world),
-        lean_flecs_Id_fromRepr(id),
-        clearGeneration,
-        deleteGeneration,
-        (int32_t)minIdCount,
-        timeBudgetSeconds
+        &desc_c
     )));
 }
 

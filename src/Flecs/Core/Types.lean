@@ -1,12 +1,11 @@
 import Pod.Meta
-import Pod.Int
 import Pod.Fixnum
 import Pod.Storable
 import Pod.ReadBytes
 import Pod.Instances
 import Flecs.Core.Defines
 
-open Pod (Int16 Int32 Int64 UFixnum Storable ReadBytes)
+open Pod (UFixnum Storable ReadBytes)
 
 namespace Flecs
 
@@ -325,7 +324,7 @@ structure Term where
   oper : OperKind := .and
   /-- Index of field for term in iterator. -/
   fieldIndex : Int16
-deriving Repr, Inhabited
+deriving Inhabited
 
 structure QueryFlags where
   val : UInt32
@@ -664,10 +663,6 @@ opaque WorldInfo.pairIdCount (wi : @& WorldInfo) : BaseIO Int32
 @[extern "lean_flecs_WorldInfo_tableCount"]
 opaque WorldInfo.tableCount (wi : @& WorldInfo) : BaseIO Int32
 
-/-- Number of tables without entities. -/
-@[extern "lean_flecs_WorldInfo_emptyTableCount"]
-opaque WorldInfo.emptyTableCount (wi : @& WorldInfo) : BaseIO Int32
-
 
 /-- Type that contains information about a query group. `α` - group context type. -/
 define_foreign_type QueryGroupInfo (α : Type)
@@ -685,8 +680,53 @@ opaque QueryGroupInfo.tableCount (qgi : @& QueryGroupInfo α) : BaseIO Int32
 opaque QueryGroupInfo.ctx [Nonempty α] (qgi : @& QueryGroupInfo α) : BaseIO α
 
 
+/-- Used with `World.deleteEmptyTables` -/
+structure DeleteEmptyTablesDesc where
+  /-- Optional component filter for the tables to evaluate. -/
+  id : Id := 0
+  /-- Free table data when generation > clearGeneration. -/
+  clearGeneration : UInt16 := 0
+  /-- Delete table when generation > deleteGeneration. -/
+  deleteGeneration : UInt16 := 0
+  /-- Minimum number of component ids the table should have. -/
+  minIdCount : UInt32 := 0
+  /-- Amount of time operation is allowed to spend. -/
+  timeBudgetSeconds : Float := 0.0
+deriving Inhabited
+
+
 /-! # Builtin component types -/
 
 
 /-! # Other types -/
 /-! # Other types -/
+
+
+/-! # Wrapper types -/
+
+/-- Aperiodic action flags (used by `World.runAperiodic`) -/
+structure AperiodicActionFlags where
+  val : UInt32
+deriving Repr, Inhabited
+
+instance : OfNat AperiodicActionFlags 0 := ⟨⟨0⟩⟩
+instance : OrOp AperiodicActionFlags where
+  or a b := .mk (a.val ||| b.val)
+
+private
+define_foreign_constant AperiodicActionFlags.emptyQueries' : Flags32 := "lean_flecs_AperiodicActionFlags_emptyQueries"
+
+private
+define_foreign_constant AperiodicActionFlags.componentMonitors' : Flags32 := "lean_flecs_AperiodicActionFlags_componentMonitors"
+
+/--
+Process empty queries.
+-/
+def AperiodicActionFlags.emptyQueries :=
+  AperiodicActionFlags.mk AperiodicActionFlags.emptyQueries'
+
+/--
+Process component monitors.
+-/
+def AperiodicActionFlags.componentMonitors :=
+  AperiodicActionFlags.mk AperiodicActionFlags.componentMonitors'

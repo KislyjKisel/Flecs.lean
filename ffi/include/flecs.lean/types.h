@@ -201,3 +201,20 @@ LEAN_POD_PTR_ALIAS(flecs_QueryGroupInfo, const ecs_query_group_info_t*)
 #define LEAN_FLECS_QueryCount_entities BOX, 1, LEAN_FLECS_QueryCount_LAYOUT
 #define LEAN_FLECS_QueryCount_tables BOX, 2, LEAN_FLECS_QueryCount_LAYOUT
 #define LEAN_FLECS_QueryCount_emptyTables BOX, 3, LEAN_FLECS_QueryCount_LAYOUT
+
+#define LEAN_FLECS_DeleteEmptyTablesDesc_LAYOUT 0, 0, 0, 2, 1, 2, 0
+#define LEAN_FLECS_DeleteEmptyTablesDesc_id U64, 0, LEAN_FLECS_DeleteEmptyTablesDesc_LAYOUT
+#define LEAN_FLECS_DeleteEmptyTablesDesc_clearGeneration U16, 0, LEAN_FLECS_DeleteEmptyTablesDesc_LAYOUT
+#define LEAN_FLECS_DeleteEmptyTablesDesc_deleteGeneration U16, 1, LEAN_FLECS_DeleteEmptyTablesDesc_LAYOUT
+#define LEAN_FLECS_DeleteEmptyTablesDesc_minIdCount U32, 0, LEAN_FLECS_DeleteEmptyTablesDesc_LAYOUT
+#define LEAN_FLECS_DeleteEmptyTablesDesc_timeBudgetSeconds F64, 1, LEAN_FLECS_DeleteEmptyTablesDesc_LAYOUT
+
+static inline ecs_delete_empty_tables_desc_t lean_flecs_DeleteEmptyTablesDesc_fromRepr(b_lean_obj_arg obj) {
+    ecs_delete_empty_tables_desc_t desc;
+    desc.id = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_id);
+    desc.clear_generation = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_clearGeneration);
+    desc.delete_generation = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_deleteGeneration);
+    desc.min_id_count = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_minIdCount);
+    desc.time_budget_seconds = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_timeBudgetSeconds);
+    return desc;
+}
