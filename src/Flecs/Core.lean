@@ -9,3 +9,4 @@ import Flecs.Core.Queries
 import Flecs.Core.Observers
 import Flecs.Core.Iterators
 import Flecs.Core.Tables
+import Flecs.Core.Utils
