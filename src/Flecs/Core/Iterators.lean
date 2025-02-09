@@ -6,7 +6,7 @@ open Pod (Storable ReadBytes WriteBytes)
 
 namespace Flecs
 
-variable {α}
+variable {α : Type}
 
 structure IterFlags where
   val : UInt32
@@ -288,16 +288,16 @@ opaque Iter.str (it : @& Iter α) : BaseIO String
 -- ecs_worker_iter ecs_worker_next
 
 @[extern "lean_flecs_Iter_fieldUnboxed"]
-opaque Iter.fieldUnboxed (it : @& Iter α) (α : Type) [@& Storable α] [@& ReadBytes α] (fieldIndex : Int32) (entityIndex : UInt32) : IO α
+opaque Iter.fieldUnboxed (it : @& Iter α) (τ) [@& Storable τ] [@& ReadBytes τ] (fieldIndex : Int32) (entityIndex : UInt32) : IO τ
 
 @[extern "lean_flecs_Iter_setFieldUnboxed"]
-opaque Iter.setFieldUnboxed (it : @& Iter α) [@& Storable α] [@& WriteBytes α] (fieldIndex : Int32) (entityIndex : UInt32) (value : α) : BaseIO Unit
+opaque Iter.setFieldUnboxed {τ} (it : @& Iter α) [@& Storable τ] [@& WriteBytes τ] (fieldIndex : Int32) (entityIndex : UInt32) (value : τ) : BaseIO Unit
 
 @[extern "lean_flecs_Iter_field"]
-opaque Iter.field (it : @& Iter α) (α : Type) (fieldIndex : Int32) (entityIndex : UInt32) : IO α
+opaque Iter.field (it : @& Iter α) (τ) (fieldIndex : Int32) (entityIndex : UInt32) : IO τ
 
 @[extern "lean_flecs_Iter_setField"]
-opaque Iter.setField (it : @& Iter α) (fieldIndex : Int32) (entityIndex : UInt32) (value : α) : BaseIO Unit
+opaque Iter.setField {τ} (it : @& Iter α) (fieldIndex : Int32) (entityIndex : UInt32) (value : τ) : BaseIO Unit
 
 /-- Test whether the field is readonly. -/
 @[extern "lean_flecs_Iter_fieldIsReadonly"]
