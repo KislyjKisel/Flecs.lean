@@ -318,6 +318,12 @@ structure Term where
   first : Option TermRef := none
   /-- Second element of pair. -/
   second : Option TermRef := none
+  /--
+  Relationship to traverse when looking for the component.
+  The relationship must have the `Traversable` property.
+  Default is `IsA`.
+  -/
+  trav : Entity := 0
   /-- Access to contents matched by term. -/
   inout : InOutKind := .default
   /-- Operator of term. -/
