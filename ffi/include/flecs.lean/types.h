@@ -84,14 +84,13 @@ static inline ecs_table_range_t lean_flecs_TableRange_unbox(b_lean_obj_arg range
 #define LEAN_FLECS_TermRef_id U64, 0, LEAN_FLECS_TermRef_LAYOUT
 #define LEAN_FLECS_TermRef_name BOX, 0, LEAN_FLECS_TermRef_LAYOUT
 
-#define LEAN_FLECS_Term_LAYOUT 0, 4, 0, 1, 0, 0, 2
+#define LEAN_FLECS_Term_LAYOUT 0, 3, 0, 1, 0, 0, 2
 #define LEAN_FLECS_Term_id U64, 0, LEAN_FLECS_Term_LAYOUT
 #define LEAN_FLECS_Term_src BOX, 0, LEAN_FLECS_Term_LAYOUT
 #define LEAN_FLECS_Term_first BOX, 1, LEAN_FLECS_Term_LAYOUT
 #define LEAN_FLECS_Term_second BOX, 2, LEAN_FLECS_Term_LAYOUT
 #define LEAN_FLECS_Term_inout U8, 0, LEAN_FLECS_Term_LAYOUT
 #define LEAN_FLECS_Term_oper U8, 1, LEAN_FLECS_Term_LAYOUT
-#define LEAN_FLECS_Term_fieldIndex BOX, 3, LEAN_FLECS_Term_LAYOUT
 
 #define LEAN_FLECS_GroupBy_LAYOUT 0, 3, 0, 1, 0, 0, 0
 #define LEAN_FLECS_GroupBy_component U64, 0, LEAN_FLECS_GroupBy_LAYOUT

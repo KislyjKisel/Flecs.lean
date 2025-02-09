@@ -322,8 +322,6 @@ structure Term where
   inout : InOutKind := .default
   /-- Operator of term. -/
   oper : OperKind := .and
-  /-- Index of field for term in iterator. -/
-  fieldIndex : Int16
 deriving Inhabited
 
 structure QueryFlags where

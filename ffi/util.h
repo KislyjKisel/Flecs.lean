@@ -24,7 +24,6 @@ static inline void lean_flecs_Term_unbox(b_lean_obj_arg term, ecs_term_t* term_c
     lean_flecs_Option_TermRef_unbox(LEAN_POD_CTOR_GET(term, LEAN_FLECS_Term_second), &term_c->second);
     term_c->inout = LEAN_POD_CTOR_GET(term, LEAN_FLECS_Term_inout);
     term_c->oper = LEAN_POD_CTOR_GET(term, LEAN_FLECS_Term_oper);
-    term_c->field_index = lean_pod_Int16_unbox(LEAN_POD_CTOR_GET(term, LEAN_FLECS_Term_fieldIndex));
 }
 
 static inline int lean_flecs_OrderByAction_wrapper(ecs_entity_t e1, const void* p1, ecs_entity_t e2, const void* p2) {
