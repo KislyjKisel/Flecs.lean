@@ -302,6 +302,9 @@ opaque Iter.fieldAt (it : @& Iter α) (τ) (fieldIndex : Int32) (entityIndex : U
 @[extern "lean_flecs_Iter_setField"]
 opaque Iter.setField {τ} (it : @& Iter α) (fieldIndex : Int32) (entityIndex : UInt32) (value : τ) : BaseIO Unit
 
+@[extern "lean_flecs_Iter_setFieldAt"]
+opaque Iter.setFieldAt {τ} (it : @& Iter α) (fieldIndex : Int32) (entityIndex : UInt32) (value : τ) : BaseIO Unit
+
 /-- Test whether the field is readonly. -/
 @[extern "lean_flecs_Iter_fieldIsReadonly"]
 opaque Iter.fieldIsReadonly (it : @& Iter α) (index : Int32) : BaseIO Bool
