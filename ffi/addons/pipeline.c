@@ -4,7 +4,7 @@
 #include "../util.h"
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_pipelineInit(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
-    ecs_pipeline_desc_t desc_c = {};
+    ecs_pipeline_desc_t desc_c = {0};
     desc_c.entity = lean_ctor_get_uint64(desc, sizeof(lean_object*));
     lean_object* queryDesc = lean_ctor_get(desc, 0);
     lean_inc_ref(queryDesc);

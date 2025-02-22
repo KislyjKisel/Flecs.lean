@@ -60,7 +60,7 @@ static inline void lean_flecs_GroupDeleteAction_wrapper(ecs_world_t* world, uint
 
 // `desc` gets stored in result's `.binding_ctx` (and will be freed by `.binding_ctx_free`).
 static inline ecs_query_desc_t lean_flecs_QueryDesc_fromRepr(lean_obj_arg desc) {
-    ecs_query_desc_t desc_c = {};
+    ecs_query_desc_t desc_c = {0};
     desc_c.binding_ctx = desc; // to keep strings alive
     desc_c.binding_ctx_free = lean_flecs_obj_ctx_free;
     lean_object* terms = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_QueryDesc_terms);

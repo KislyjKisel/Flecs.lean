@@ -5,7 +5,7 @@
 #include "../util.h"
 
 static lean_obj_res lean_flecs_World_emit_impl(lean_flecs_World world, b_lean_obj_arg desc, void (*f)(ecs_world_t* w, ecs_event_desc_t* d)) {
-    ecs_type_t type = {};
+    ecs_type_t type = {0};
     ecs_event_desc_t desc_c = { .ids = &type };
     desc_c.event = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EventDesc_event);
     {
@@ -64,7 +64,7 @@ static void lean_flecs_observer_callback(ecs_iter_t *it) {
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_observerInit(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
-    ecs_observer_desc_t desc_c = {};
+    ecs_observer_desc_t desc_c = {0};
     desc_c.entity = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_ObserverDesc_entity);
     {
         lean_object* queryDesc = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_ObserverDesc_query);

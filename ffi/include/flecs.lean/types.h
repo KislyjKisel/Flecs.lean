@@ -171,7 +171,7 @@ static inline ecs_table_range_t lean_flecs_TableRange_unbox(b_lean_obj_arg range
 // `symbol` is ignored (appears to be unused by `ecs_entity_init`);
 // some contained string pointers' lifetimes are tied to the `desc` argument.
 static inline ecs_entity_desc_t lean_flecs_EntityDesc_fromRepr(b_lean_obj_arg desc) {
-    ecs_entity_desc_t desc_c = {};
+    ecs_entity_desc_t desc_c = {0};
     desc_c.id = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_id);
     desc_c.parent = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_EntityDesc_parent);
     // Mutated and stored by `ecs_entity_init`; empty = none.
@@ -232,7 +232,7 @@ LEAN_POD_PTR_ALIAS(flecs_QueryGroupInfo, const ecs_query_group_info_t*)
 #define LEAN_FLECS_DeleteEmptyTablesDesc_timeBudgetSeconds F64, 1, LEAN_FLECS_DeleteEmptyTablesDesc_LAYOUT
 
 static inline ecs_delete_empty_tables_desc_t lean_flecs_DeleteEmptyTablesDesc_fromRepr(b_lean_obj_arg obj) {
-    ecs_delete_empty_tables_desc_t desc;
+    ecs_delete_empty_tables_desc_t desc = {0};
     desc.id = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_id);
     desc.clear_generation = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_clearGeneration);
     desc.delete_generation = LEAN_POD_CTOR_GET(obj, LEAN_FLECS_DeleteEmptyTablesDesc_deleteGeneration);

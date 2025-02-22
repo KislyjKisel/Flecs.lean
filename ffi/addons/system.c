@@ -52,7 +52,7 @@ static void lean_flecs_system_callback(ecs_iter_t* it) {
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_systemInit(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
-    ecs_system_desc_t desc_c;
+    ecs_system_desc_t desc_c = {0};
     desc_c.entity = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_SystemDesc_entity);
     lean_object* queryDesc = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_SystemDesc_query);
     lean_inc_ref(queryDesc);

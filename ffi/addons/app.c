@@ -57,7 +57,7 @@ static int lean_flecs_AppFrameAction_wrapper(ecs_world_t* world, const ecs_app_d
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_appRun(lean_flecs_World world, lean_obj_arg desc, lean_obj_arg io_) {
-    ecs_app_desc_t desc_c = {};
+    ecs_app_desc_t desc_c = {0};
     desc_c.target_fps = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_targetFps);
     desc_c.delta_time = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_deltaTime);
     desc_c.threads = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDescX_threads));
@@ -76,7 +76,7 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_appRun(lean_flecs_World world, lean_ob
 }
 
 LEAN_EXPORT lean_obj_res lean_flecs_World_appRunFrame(lean_flecs_World world, b_lean_obj_arg desc, lean_obj_arg io_) {
-    ecs_app_desc_t desc_c = {};
+    ecs_app_desc_t desc_c = {0};
     desc_c.target_fps = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_targetFps);
     desc_c.delta_time = LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_deltaTime);
     desc_c.threads = lean_pod_Int32_unbox(LEAN_POD_CTOR_GET(desc, LEAN_FLECS_AppDesc_threads));
