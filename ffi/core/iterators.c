@@ -199,6 +199,16 @@ LEAN_EXPORT lean_obj_res lean_flecs_Iter_field(lean_flecs_Iter it, uint32_t fiel
     return lean_io_result_mk_ok(values[entityIndex]);
 }
 
+LEAN_EXPORT lean_obj_res lean_flecs_Iter_fieldAt(lean_flecs_Iter it, uint32_t fieldIndex, uint32_t entityIndex, lean_obj_arg io_) {
+    ecs_iter_t* it_c = lean_flecs_Iter_fromRepr(it);
+    lean_object** value = ecs_field_at(it_c, lean_object*, (int32_t)fieldIndex, (int32_t)entityIndex);
+    if (LEAN_UNLIKELY(value == NULL)) {
+        return lean_mk_io_user_error(lean_mk_string("ecs_field_at returned NULL"));
+    }
+    lean_inc(*value);
+    return lean_io_result_mk_ok(*value);
+}
+
 LEAN_EXPORT lean_obj_res lean_flecs_Iter_setField(lean_flecs_Iter it, uint32_t fieldIndex, uint32_t entityIndex, lean_obj_arg value, lean_obj_arg io_) {
     ecs_iter_t* it_c = lean_flecs_Iter_fromRepr(it);
     if (LEAN_LIKELY(entityIndex < it_c->count)) {

@@ -296,6 +296,9 @@ opaque Iter.setFieldUnboxed {τ} (it : @& Iter α) [@& Storable τ] [@& WriteByt
 @[extern "lean_flecs_Iter_field"]
 opaque Iter.field (it : @& Iter α) (τ) (fieldIndex : Int32) (entityIndex : UInt32) : IO τ
 
+@[extern "lean_flecs_Iter_fieldAt"]
+opaque Iter.fieldAt (it : @& Iter α) (τ) (fieldIndex : Int32) (entityIndex : UInt32) : IO τ
+
 @[extern "lean_flecs_Iter_setField"]
 opaque Iter.setField {τ} (it : @& Iter α) (fieldIndex : Int32) (entityIndex : UInt32) (value : τ) : BaseIO Unit
 
