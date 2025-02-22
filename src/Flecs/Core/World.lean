@@ -3,7 +3,7 @@ import Flecs.Core.Types
 
 namespace Flecs
 
-variable {α β : Type}
+variable {α : Type}
 
 /-! # Creation and deletion -/
 
@@ -342,14 +342,14 @@ opaque World.deleteEmptyTables (world : @& World α) (desc : @& DeleteEmptyTable
 
 /-- Get entity from poly. -/
 @[extern "lean_flecs_getEntity"]
-opaque Poly.getEntity (poly : @& Poly α β) : BaseIO Entity
+opaque Poly.getEntity (poly : @& Poly α) : BaseIO Entity
 
 /-- Make a pair id. -/
 @[extern "lean_flecs_makePair"]
 opaque makePair (first second : Entity) : Id
 
 @[extern "lean_flecs_Poly_asWorld"]
-opaque Poly.asWorld (poly : @& Poly α β) : BaseIO (Option (World α))
+opaque Poly.asWorld (poly : @& Poly α) : BaseIO (Option (World α))
 
 @[extern "lean_flecs_Poly_asQuery"]
-opaque Poly.asQuery (poly : @& Poly α β) : BaseIO (Option (Query β))
+opaque Poly.asQuery (poly : @& Poly α) : BaseIO (Option Query)

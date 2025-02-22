@@ -11,11 +11,21 @@ namespace Flecs
 
 open scoped Pod
 
-variable {α β : Type}
+variable {α : Type}
 
 @[extern "lean_flecs_initialize_types"] private
 opaque initializeTypes : BaseIO Unit
 builtin_initialize initializeTypes
+
+
+/--
+A type with a TypeName instance.
+Used to default initialize Dynamic fields since Init doesn't provide TypeName instances for common types.
+-/
+private inductive Unit' where | mk deriving TypeName
+
+@[export lean_flecs_Dynamic_mk_empty] protected
+def mkEmptyDynamic (_ : Unit) : Dynamic := Dynamic.mk Unit'.mk
 
 
 /-! # Core API Types -/
@@ -57,7 +67,7 @@ structure TableRange where
 deriving Nonempty
 
 /-- A query. -/
-define_foreign_type Query (groupCtx : Type)
+define_foreign_type Query
 
 /-- An observer is a system that is invoked when an event matches its query. -/
 define_foreign_type Observer -- const*
@@ -109,13 +119,13 @@ This is the current list of types in the flecs API that can be used as an `Poly`
 Functions that accept an `Poly` argument can accept objects of these types.
 If the object does not have the requested mixin the API will throw an assert.
 -/
-define_foreign_type Poly (worldCtx groupCtx : Type)
+define_foreign_type Poly (worldCtx : Type)
 
 private unsafe
-def Poly.ofWorldImpl (world : World α) : Poly α β := unsafeCast world
+def Poly.ofWorldImpl (world : World α) : Poly α := unsafeCast world
 
 @[implemented_by ofWorldImpl]
-opaque Poly.ofWorld (world : World α) : Poly α β
+opaque Poly.ofWorld (world : World α) : Poly α
 
 -- private unsafe
 -- def Poly.ofStageImpl (Stage : Stage) : Poly := unsafeCast Stage
@@ -124,10 +134,10 @@ opaque Poly.ofWorld (world : World α) : Poly α β
 -- opaque Poly.ofStage (Stage : Stage) : Poly
 
 private unsafe
-def Poly.ofQueryImpl (query : Query β) : Poly α β := unsafeCast query
+def Poly.ofQueryImpl (query : Query) : Poly α := unsafeCast query
 
 @[implemented_by ofQueryImpl]
-opaque Poly.ofQuery (query : Query β) : Poly α β
+opaque Poly.ofQuery (query : Query) : Poly α
 
 -- Unused
 -- /-- Type that stores poly mixins. -/
@@ -150,14 +160,14 @@ def OrderByAction (α : Type) := Entity → α → Entity → α → BaseIO Int3
 def GroupByAction (α) := World α → Table → (groupId : Id) → BaseIO UInt64
 
 /-- Callback invoked when a query creates a new group. -/
-def GroupCreateAction (worldCtx groupCtx : Type) := World worldCtx → (groupId : UInt64) → BaseIO groupCtx
+def GroupCreateAction (worldCtx : Type) := World worldCtx → (groupId : UInt64) → BaseIO Dynamic
 
-def GroupCreateAction.unit : GroupCreateAction α Unit := λ _ _ ↦ pure ()
+def GroupCreateAction.unit : GroupCreateAction α := λ _ _ ↦ pure (Flecs.mkEmptyDynamic ())
 
 /-- Callback invoked when a query deletes an existing group. -/
-def GroupDeleteAction (worldCtx groupCtx : Type) := World worldCtx → (groupId : UInt64) → groupCtx → BaseIO Unit
+def GroupDeleteAction (worldCtx : Type) := World worldCtx → (groupId : UInt64) → Dynamic → BaseIO Unit
 
-def GroupDeleteAction.unit : GroupDeleteAction α Unit := λ _ _ _ ↦ pure ()
+def GroupDeleteAction.unit : GroupDeleteAction α := λ _ _ _ ↦ pure ()
 
 -- /-- Function type for runnables (systems, observers). -/
 -- def RunAction := Iter → BaseIO Unit
@@ -385,14 +395,14 @@ inductive OrderBy where
 | boxed (entity : Entity) (α : Type) (callback : OrderByAction α)
 | unboxed (entity : Entity) (α : Type) (callback : OrderByAction α) [Storable α] [ReadBytes α]
 
-structure GroupBy (worldCtx groupCtx : Type) where
+structure GroupBy (worldCtx : Type) where
   component : Id
   callback : Option (GroupByAction worldCtx) := none
-  onCreate : GroupCreateAction worldCtx groupCtx
-  onDelete : GroupDeleteAction worldCtx groupCtx
+  onCreate : GroupCreateAction worldCtx
+  onDelete : GroupDeleteAction worldCtx
 
 /-- Used with `Query.init`. -/
-structure QueryDesc (worldCtx groupCtx : Type) where
+structure QueryDesc (worldCtx : Type) where
   /-- Query terms -/
   terms : Array Term := #[]
   terms_size_lt : terms.size < termCountMax := by simp; decide
@@ -403,7 +413,7 @@ structure QueryDesc (worldCtx groupCtx : Type) where
   /-- Flags for enabling query features. -/
   flags : QueryFlags := 0
   orderBy : OrderBy := .none
-  groupBy : Option (GroupBy worldCtx groupCtx) := .none
+  groupBy : Option (GroupBy worldCtx) := .none
   /-- Entity associated with query (optional). -/
   entity : Entity := 0
 
@@ -411,17 +421,8 @@ inductive EventTarget where
 | entity (entity : Entity)
 | table (table : Table) (offset count : Int32)
 
-/--
-A type with a TypeName instance.
-Used to default initialize Dynamic fields since Init doesn't provide TypeName instances for common types.
--/
-private inductive Unit' where | mk deriving TypeName
-
-@[export lean_flecs_Dynamic_mk_empty] protected
-def mkEmptyDynamic (_ : Unit) : Dynamic := Dynamic.mk Unit'.mk
-
 /-- Used with `World.emit` -/
-structure EventDesc (worldCtx groupCtx : Type) where
+structure EventDesc (worldCtx : Type) where
   /-- The event id. Only observers for the specified event will be notified. -/
   event : Entity
   /--
@@ -437,17 +438,17 @@ structure EventDesc (worldCtx groupCtx : Type) where
   -/
   param : UFixnum := 0
   /-- Observable (usually the world) -/
-  observable : Option (Poly worldCtx groupCtx) := none
+  observable : Option (Poly worldCtx) := none
   /-- Event flags -/
   flags : Flags32 := 0
   target : EventTarget
 
 /-- Used with `World.observerInit` -/
-structure ObserverDesc (worldCtx groupCtx : Type) where
+structure ObserverDesc (worldCtx : Type) where
   /-- Existing entity to associate with observer (optional) -/
   entity : Entity := 0
   /-- Query for observer -/
-  query : QueryDesc worldCtx groupCtx
+  query : QueryDesc worldCtx
   /-- Events to observe (`OnAdd`, `OnRemove`, `OnSet`) -/
   events : Array Entity
   /-- Observer must have at least one event -/
@@ -461,7 +462,7 @@ structure ObserverDesc (worldCtx groupCtx : Type) where
   /-- Callback to invoke on an event, invoked when the observer matches. -/
   callback : Iter worldCtx → (param : UFixnum) → BaseIO Unit
   /-- Observable with which to register the observer -/
-  observable : Option (Poly worldCtx groupCtx) := none
+  observable : Option (Poly worldCtx) := none
 
 
 /-! # Miscellaneous types -/
@@ -668,20 +669,20 @@ opaque WorldInfo.pairIdCount (wi : @& WorldInfo) : BaseIO Int32
 opaque WorldInfo.tableCount (wi : @& WorldInfo) : BaseIO Int32
 
 
-/-- Type that contains information about a query group. `α` - group context type. -/
-define_foreign_type QueryGroupInfo (α : Type)
+/-- Type that contains information about a query group. -/
+define_foreign_type QueryGroupInfo
 
 /-- How often tables have been matched/unmatched. -/
 @[extern "lean_flecs_QueryGroupInfo_matchCount"]
-opaque QueryGroupInfo.matchCount (qgi : @& QueryGroupInfo α) : BaseIO Int32
+opaque QueryGroupInfo.matchCount (qgi : @& QueryGroupInfo) : BaseIO Int32
 
 /-- Number of tables in group. -/
 @[extern "lean_flecs_QueryGroupInfo_tableCount"]
-opaque QueryGroupInfo.tableCount (qgi : @& QueryGroupInfo α) : BaseIO Int32
+opaque QueryGroupInfo.tableCount (qgi : @& QueryGroupInfo) : BaseIO Int32
 
 /-- Group context, returned by the group creation callback. -/
 @[extern "lean_flecs_QueryGroupInfo_ctx"]
-opaque QueryGroupInfo.ctx [Nonempty α] (qgi : @& QueryGroupInfo α) : BaseIO α
+opaque QueryGroupInfo.ctx (qgi : @& QueryGroupInfo) : BaseIO Dynamic
 
 
 /-- Used with `World.deleteEmptyTables` -/

@@ -9,7 +9,7 @@ namespace Flecs
 
 open scoped Pod
 
-variable {α β : Type}
+variable {α : Type}
 
 /-- Component used to provide a tick source to systems -/
 structure TickSource where
@@ -30,11 +30,11 @@ instance : Storable TickSource where
 #pod_c_rwbytes_instance Flecs.TickSource
 
 /-- Use with `World.systemInit` to create or update a system. -/
-structure SystemDesc (worldCtx groupCtx : Type) where
+structure SystemDesc (worldCtx : Type) where
     /-- Existing entity to associate with system (optional) -/
     entity : Entity := 0
     /-- System query parameters -/
-    query : QueryDesc worldCtx groupCtx
+    query : QueryDesc worldCtx
     /--
     Callback that is ran for each result returned by the system's query.
     This means that this callback can be invoked multiple times per system per frame,
@@ -59,9 +59,13 @@ structure SystemDesc (worldCtx groupCtx : Type) where
 
 /-- Create or update a system -/
 @[extern "lean_flecs_World_systemInit"]
-opaque World.systemInit (world : @& World α) (desc : @& SystemDesc α β) : BaseIO Entity
+opaque World.systemInit (world : @& World α) (desc : @& SystemDesc α) : BaseIO Entity
 
 define_foreign_type System (worldCtx : Type)  -- const*
+
+/-- System query. -/
+@[extern "lean_flecs_System_query"]
+opaque System.query (system : @& System α) : BaseIO Query
 
 /-- Entity associated with query -/
 @[extern "lean_flecs_System_queryEntity"]

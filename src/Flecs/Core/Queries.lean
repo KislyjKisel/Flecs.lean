@@ -2,25 +2,25 @@ import Flecs.Core.Types
 
 namespace Flecs
 
-variable {α β : Type}
+variable {α : Type}
 
 /--
 Convert query to a string expression.
 The resulting expression can be parsed to create the same query.
 -/
 @[extern "lean_flecs_Query_str"]
-opaque Query.str (query : @& Query β) : BaseIO String
+opaque Query.str (query : @& Query) : BaseIO String
 
 /-- Create a query. -/
 @[extern "lean_flecs_World_queryInit"]
-opaque World.queryInit (world : @& World α) (desc : QueryDesc α β) : BaseIO (Query β)
+opaque World.queryInit (world : @& World α) (desc : QueryDesc α) : BaseIO Query
 
 /--
 This operation destroys a query and its resources.
 If the query is used as the parent of subqueries, those subqueries will be orphaned and must be deinitialized as well.
 -/
 @[extern "lean_flecs_Query_fini"]
-opaque Query.fini (query : @& Query β) : BaseIO Unit
+opaque Query.fini (query : @& Query) : BaseIO Unit
 
 /--
 Find variable index.
@@ -30,7 +30,7 @@ This index can be used in operations like `Iter.setVar` and `Iter.getVar`.
 Returns `-1` if the variable wasn't found.
 -/
 @[extern "lean_flecs_Query_findVar"]
-opaque Query.findVar (query : @& Query β) (name : @& String) : BaseIO Int32
+opaque Query.findVar (query : @& Query) (name : @& String) : BaseIO Int32
 
 /--
 Get variable name.
@@ -38,7 +38,7 @@ Get variable name.
 Returns `none` if `varId` is invalid.
 -/
 @[extern "lean_flecs_Query_varName"]
-opaque Query.varName (query : @& Query β) (varId : Int32) : BaseIO (Option String)
+opaque Query.varName (query : @& Query) (varId : Int32) : BaseIO (Option String)
 
 /--
 Test if variable is an entity.
@@ -50,7 +50,7 @@ application to check if a variable is an entity variable.
 Returns `false` if `varId` is invalid.
 -/
 @[extern "lean_flecs_Query_varIsEntity"]
-opaque Query.varIsEntity (query : @& Query β) (varId : Int32) : BaseIO Bool
+opaque Query.varIsEntity (query : @& Query) (varId : Int32) : BaseIO Bool
 
 /--
 Create a query iterator.
@@ -78,7 +78,7 @@ iterator resources need to be cleaned up explicitly.
 [...]
 -/
 @[extern "lean_flecs_Query_iter"]
-opaque Query.iter (world : @& World α) (query : @& Query β) : BaseIO (Iter α)
+opaque Query.iter (world : @& World α) (query : @& Query) : BaseIO (Iter α)
 
 /-- Progress query iterator. Returns `true` if the iterator has more results, `false` if not. -/
 @[extern "lean_flecs_Iter_queryNext"]
@@ -89,14 +89,14 @@ Match entity with query.
 This operation matches an entity with a query and returns the result of the match.
 -/
 @[extern "lean_flecs_Query_has"]
-opaque Query.has (query : @& Query β) (entity : Entity) : BaseIO (Option (Iter α))
+opaque Query.has (query : @& Query) (entity : Entity) : BaseIO (Option (Iter α))
 
 /--
 Match table with query.
 This operation matches a table with a query and returns the result of the match.
 -/
 @[extern "lean_flecs_Query_hasTable"]
-opaque Query.hasTable (query : @& Query β) (table : @& Table) : BaseIO (Option (Iter α))
+opaque Query.hasTable (query : @& Query) (table : @& Table) : BaseIO (Option (Iter α))
 
 /--
 Match range with query.
@@ -105,21 +105,21 @@ This operation matches a range with a query and returns the result of the match.
 The entire range must match the query for the operation to return `some`.
 -/
 @[extern "lean_flecs_Query_hasRange"]
-opaque Query.hasRange (query : @& Query β) (range : @& TableRange) : BaseIO (Option (Iter α))
+opaque Query.hasRange (query : @& Query) (range : @& TableRange) : BaseIO (Option (Iter α))
 
 /--
 Returns how often a match event happened for a cached query.
 This operation can be used to determine whether the query cache has been updated with new tables.
 -/
 @[extern "lean_flecs_Query_matchCount"]
-opaque Query.matchCount (query : @& Query β) : BaseIO Int32
+opaque Query.matchCount (query : @& Query) : BaseIO Int32
 
 /--
 Convert query to a string.
 This will convert the query program to a string which can aid in debugging the behavior of a query.
 -/
 @[extern "lean_flecs_Query_plan"]
-opaque Query.plan (query : @& Query β) : BaseIO String
+opaque Query.plan (query : @& Query) : BaseIO String
 
 /--
 Convert query to string with profile.
@@ -129,7 +129,7 @@ it.setFlags ((← it.flags) ||| IterFlags.profile)
 ```
 -/
 @[extern "lean_flecs_Query_planWithProfile"]
-opaque Query.planWithProfile (query : @& Query β) (it : @& Iter α) : BaseIO String
+opaque Query.planWithProfile (query : @& Query) (it : @& Iter α) : BaseIO String
 
 -- TODO: Query.argsParse
 -- /--
@@ -144,7 +144,7 @@ opaque Query.planWithProfile (query : @& Query β) (it : @& Iter α) : BaseIO St
 -- Returns offset from the start of `expr` of the next character after the last parsed one.
 -- -/
 -- @[extern "lean_flecs_Query_argsParse"]
--- opaque Query.argsParse (query : @& Query β) (it : @& Iter α) (expr : @& String) : BaseIO Nat
+-- opaque Query.argsParse (query : @& Query) (it : @& Iter α) (expr : @& String) : BaseIO Nat
 
 /--
 Returns whether the query data changed since the last iteration.
@@ -157,7 +157,7 @@ The operation will return `true` after:
 [...]
 -/
 @[extern "lean_flecs_Query_changed"]
-opaque Query.changed (query : @& Query β) : BaseIO Bool
+opaque Query.changed (query : @& Query) : BaseIO Bool
 
 /--
 Skip a table while iterating.
@@ -186,7 +186,7 @@ Get context of query group.
 This operation returns the context of a query group as returned by the `GroupBy` `onCreate` callback.
 -/
 @[extern "lean_flecs_Query_getGroupCtx"]
-opaque Query.getGroupCtx (query : @& Query β) (groupId : UInt64) : BaseIO (Option β)
+opaque Query.getGroupCtx (query : @& Query) (groupId : UInt64) : BaseIO (Option Dynamic)
 
 /--
 Get information about query group.
@@ -194,7 +194,7 @@ This operation returns information about a query group, including the group
 context returned by the `GroupBy` `onCreate` callback.
 -/
 @[extern "lean_flecs_Query_getGroupInfo"]
-opaque Query.getGroupInfo (query : @& Query β) (groupId : UInt64) : BaseIO (Option (QueryGroupInfo β))
+opaque Query.getGroupInfo (query : @& Query) (groupId : UInt64) : BaseIO (Option QueryGroupInfo)
 
 /-- Structure returned by `Query.count`. -/
 structure QueryCount where
@@ -213,8 +213,8 @@ Returns number of entities and results the query matches with.
 Only entities matching the `$this` variable as source are counted.
 -/
 @[extern "lean_flecs_Query_count"]
-opaque Query.count (query : @& Query β) : BaseIO QueryCount
+opaque Query.count (query : @& Query) : BaseIO QueryCount
 
 /-- Does query return one or more results.  -/
 @[extern "lean_flecs_Query_isTrue"]
-opaque Query.isTrue (query : @& Query β) : BaseIO Bool
+opaque Query.isTrue (query : @& Query) : BaseIO Bool

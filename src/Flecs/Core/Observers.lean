@@ -2,7 +2,7 @@ import Flecs.Core.Types
 
 namespace Flecs
 
-variable {α β : Type}
+variable {α : Type}
 
 /--
 Send event.
@@ -18,7 +18,7 @@ assumptions the code makes about the conditions under which those events are sen
 Triggers are invoked synchronously.
 -/
 @[extern "lean_flecs_World_emit"]
-opaque World.emit (world : @& World α) (desc : @& EventDesc α β) : BaseIO Unit
+opaque World.emit (world : @& World α) (desc : @& EventDesc α) : BaseIO Unit
 
 /--
 Enqueue event.
@@ -28,7 +28,7 @@ The event will be emitted when `World.deferEnd` is called.
 If this operation is called when the provided world is not in deferred mode it behaves just like `World.emit`.
 -/
 @[extern "lean_flecs_World_enqueue"]
-opaque World.enqueue (world : @& World α) (desc : @& EventDesc α β) : BaseIO Unit
+opaque World.enqueue (world : @& World α) (desc : @& EventDesc α) : BaseIO Unit
 
 /--
 Create observer.
@@ -38,7 +38,7 @@ An observer only triggers when the source of the event meets all terms.
 See the documentation for `ObserverDesc` for more details.
 -/
 @[extern "lean_flecs_World_observerInit"]
-opaque World.observerInit (world : @& World α) (desc : @& ObserverDesc α β) : BaseIO Entity
+opaque World.observerInit (world : @& World α) (desc : @& ObserverDesc α) : BaseIO Entity
 
 /--
 Get observer object.

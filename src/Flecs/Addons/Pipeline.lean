@@ -2,9 +2,9 @@ import Flecs.Core.Types
 
 namespace Flecs
 
-variable {α β : Type}
+variable {α : Type}
 
-structure PipelineDesc (α β : Type) where
+structure PipelineDesc (worldCtx : Type) where
   /-- Existing entity to associate with pipeline (optional). -/
   entity : Entity := 0
   /--
@@ -29,11 +29,11 @@ structure PipelineDesc (α β : Type) where
   how query features can be applied to pipelines, and how the builtin
   pipeline query works.
   -/
-  query : QueryDesc α β
+  query : QueryDesc worldCtx
 
 /-- Create a custom pipeline. -/
 @[extern "lean_flecs_World_pipelineInit"]
-opaque World.pipelineInit (world : @& World α) (desc : @& PipelineDesc α β) : BaseIO Entity
+opaque World.pipelineInit (world : @& World α) (desc : @& PipelineDesc α) : BaseIO Entity
 
 /--
 Set a custom pipeline.

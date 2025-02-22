@@ -72,6 +72,10 @@ LEAN_EXPORT lean_obj_res lean_flecs_World_systemInit(lean_flecs_World world, b_l
 
 LEAN_POD_PTR_ALIAS(flecs_System, const ecs_system_t*);
 
+LEAN_EXPORT lean_obj_res lean_flecs_System_query(lean_flecs_System system, lean_obj_arg io_) {
+    return lean_io_result_mk_ok(lean_flecs_Query_box(lean_flecs_System_fromRepr(system)->query));
+}
+
 LEAN_EXPORT lean_obj_res lean_flecs_System_queryEntity(lean_flecs_System system, lean_obj_arg io_) {
     return lean_io_result_mk_ok(lean_flecs_Entity_box(lean_flecs_System_fromRepr(system)->query_entity));
 }
