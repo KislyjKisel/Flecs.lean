@@ -307,12 +307,12 @@ structure TermRef where
   the id will be initialized to `Entity.this`.
   To explicitly set the id to 0, leave the id member to 0 and set `TermFlags.isEntity` in flags.
   -/
-  id : Entity
+  id : Entity := 0
   /--
   Name.
   This can be either the variable name (when `TermFlags.isVariable` flag is set) or an entity name.
   -/
-  name : String
+  name : Option String := none
 deriving Repr, Inhabited
 
 /-- Type that describes a term (single element in a query). -/

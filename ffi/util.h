@@ -12,7 +12,8 @@ static inline void lean_flecs_Option_TermRef_unbox(b_lean_obj_arg optTermRef, ec
     if (lean_option_is_some(optTermRef)) {
         lean_object* termRef = lean_ctor_get(optTermRef, 0);
         termRef_c->id = LEAN_POD_CTOR_GET(termRef, LEAN_FLECS_TermRef_id);
-        termRef_c->name = lean_string_cstr(LEAN_POD_CTOR_GET(termRef, LEAN_FLECS_TermRef_name));
+        lean_object* name = LEAN_POD_CTOR_GET(termRef, LEAN_FLECS_TermRef_name);
+        termRef_c->name = lean_option_is_some(name) ? lean_string_cstr(lean_ctor_get(name, 0)) : NULL;
     }
 }
 
