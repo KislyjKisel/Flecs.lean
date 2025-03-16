@@ -117,6 +117,7 @@ extern_lib «flecs-lean» pkg := do
   let nativeSrcDir := pkg.dir / "ffi"
   let objectFileDir := pkg.buildDir / "ffi"
   let extraTrace ← mixTraceArray <$> (bindingsExtras.mapM $ λ h ↦ computeTrace (pkg.dir / ⟨h⟩))
+  let extraTrace : BuildTrace := mixTrace extraTrace (← getLeanTrace)
   buildStaticLib (pkg.nativeLibDir / name)
     (#[(← flecs.o.fetch)].append
       (← bindingsSources.mapM λ suffix ↦ do
